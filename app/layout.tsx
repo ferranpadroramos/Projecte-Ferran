@@ -25,12 +25,35 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
-        <header>
+        <header className="flex items-center gap-4 h-16 bg-blue-100 px-4">
+          <button className="border px-3 py-1 rounded-lg">HOME</button>
           
+          
+          <div className="max-h-4/5">
+            <img src="/img/search.png" alt="cercar"/>
+            <input type="text"/>
+          </div>
+          
+          
+          <a href="/following">Following</a>
+          <a href="/team">Team</a>
+          <a href="/publicate">Publicate</a>
+
+          <nav className="flex">
+            <a href="" className="border px-3 py-1 rounded-l-lg">Notifications</a>
+            <a href="" className="border-y border-r px-3 py-1">Requests</a>
+            <a href="" className="border-y border-r px-3 py-1 rounded-r-lg">Direct messages</a>
+          </nav>
+
+          <img src="" alt="perfil" />
+
+          <img src="" alt="tancarSessió" />
         </header>
-        {children}
+        <main className="flex-1 flex items-center justify-center">
+          {children}
+        </main>
       </body>
     </html>
   );
