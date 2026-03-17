@@ -1,9 +1,5 @@
 'use client'
-import {usePathname} from 'next/navigation'
 export default function Header(){
-    const pathname = usePathname() 
-    if (pathname === '/login') return null
-
     return <header className="flex items-center gap-4 h-16 bg-blue-100 px-4 justify-between">
           {/* <a href> - Navegació tradicional amb recàrrega de pàgina */}
           <a href="/" className="border px-3 py-1 rounded-lg">HOME</a>
