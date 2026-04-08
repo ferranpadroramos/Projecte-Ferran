@@ -12,26 +12,59 @@ datasource db {
   provider = "postgresql"
 }
 
-model Admin {
+model User {
   id        Int      @id @default(autoincrement())
   username  String   @unique
   email     String   @unique
   password  String
+  isAdmin   Boolean  @default(false)
+  regionId  Int?
+  role      Role[]
   reports   Report[]
   createdAt DateTime @default(now())
-}
 
-model Player {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
+  region              Region?        @relation(fields: [regionId], references: [id])
+  sentNotifications   Notification[] @relation("sender")
+  receivedNotifications Notification[] @relation("receiver")
 }
 
 model Report {
   id        Int      @id @default(autoincrement())
-  adminId   Int?
-  admin     Admin?   @relation(fields: [adminId], references: [id])
+  userId   Int?
+  user     User?     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  desc      String
+  user    User[]
+}
+
+model Region {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  desc      String
+  user    User[]
+  
+}
+
+model Notification {
+  id         Int              @id @default(autoincrement())
+  typeId     Int
+  timestamp  DateTime         @default(now())
+  senderId   Int
+  receiverId Int
+
+  notiType   NotificationType @relation(fields: [typeId], references: [id])
+  sender     User             @relation("sender", fields: [senderId], references: [id])
+  receiver   User             @relation("receiver", fields: [receiverId], references: [id])
+}
+
+model NotificationType {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  desc      String
+  notifications Notification[]
 }
