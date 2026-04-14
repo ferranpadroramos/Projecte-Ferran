@@ -13,89 +13,184 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  email     String   @unique
-  password  String
-  isAdmin   Boolean  @default(false)
-  regionId  Int?
-  rankId    Int?
-  likes     Publication[]
-  role      Role[]
-  reports   Report[]
-  createdAt DateTime @default(now())
-
-  rank        Rank?        @relation(fields: [rankId], references: [id])
-  region      Region?        @relation(fields: [regionId], references: [id])
+  id            Int      @id @default(autoincrement())
+  username      String   @unique
+  email         String   @unique
+  password      String
+  isAdmin       Boolean  @default(false)
+  regionId      Int?
+  rankId        Int?
+  
+  role          Role[]
+  likes         Like[]
+  reports       Report[]
+  friendRequestsSent      FriendRequest[] @relation("friendRequestSender")
+  friendRequestsReceived  FriendRequest[] @relation("friendRequestReceiver")
+  friendships1            Friendship[]    @relation("friendshipUser1")
+  friendships2            Friendship[]    @relation("friendshipUser2")
+  messages                Message[]
+  tagsMade      Tag[]  @relation("tagger")
+  tagsReceived  Tag[]  @relation("tagged")
+  publications  Publication[] @relation("publicationAuthor")
+  comments      Comment[]   @relation("commentAuthor")
   sentNotifications   Notification[] @relation("sender")
   receivedNotifications Notification[] @relation("receiver")
+  createdAt     DateTime @default(now())
+
+  rank          Rank?        @relation(fields: [rankId], references: [id])
+  region        Region?        @relation(fields: [regionId], references: [id])
+  
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model FriendRequest {
+  id          Int           @id @default(autoincrement())
+  senderId    Int
+  receiverId  Int
+  status      RequestStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+
+  sender      User          @relation("friendRequestSender", fields: [senderId], references: [id])
+  receiver    User          @relation("friendRequestReceiver", fields: [receiverId], references: [id])
+}
+
+model Friendship {
+  id          Int          @id @default(autoincrement())
+  user1Id     Int
+  user2Id     Int
+  createdAt   DateTime     @default(now())
+
+  user1       User         @relation("friendshipUser1", fields: [user1Id], references: [id])
+  user2       User         @relation("friendshipUser2", fields: [user2Id], references: [id])
+  conversation Conversation?
+}
+
+model Conversation {
+  id           Int        @id @default(autoincrement())
+  friendshipId Int        @unique
+
+  friendship   Friendship @relation(fields: [friendshipId], references: [id])
+  messages     Message[]
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  senderId       Int
+  conversationId Int
+  text           String
+  createdAt      DateTime     @default(now())
+
+  sender         User         @relation(fields: [senderId], references: [id])
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+}
+
+model Tag {
+  id            Int          @id @default(autoincrement())
+  taggerId      Int
+  taggedId      Int
+  publicationId Int?
+  commentId     Int?
+  createdAt     DateTime     @default(now())
+
+  tagger        User         @relation("tagger", fields: [taggerId], references: [id])
+  tagged        User         @relation("tagged", fields: [taggedId], references: [id])
+  publication   Publication? @relation(fields: [publicationId], references: [id])
+  comment       Comment?     @relation(fields: [commentId], references: [id])
+}
+
+model Like {
+  id            Int          @id @default(autoincrement())
+  userId        Int
+  publicationId Int?
+  commentId     Int?
+  createdAt     DateTime     @default(now())
+
+  user          User         @relation(fields: [userId], references: [id])
+  publication   Publication? @relation(fields: [publicationId], references: [id])
+  comment       Comment?     @relation(fields: [commentId], references: [id])
 }
 
 model Report {
-  id        Int      @id @default(autoincrement())
-  userId   Int?
-  user     User?     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
+  id            Int          @id @default(autoincrement())
+  authorId      Int
+  publicationId Int?
+  commentId     Int?
+  createdAt     DateTime     @default(now())
+
+  author        User         @relation(fields: [authorId], references: [id])
+  publication   Publication? @relation(fields: [publicationId], references: [id])
+  comment       Comment?     @relation(fields: [commentId], references: [id])
 }
 
 model Role {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  desc      String
-  user    User[]
+  id            Int      @id @default(autoincrement())
+  name          String   @unique
+  desc          String
+  user          User[]
 }
 
 model Rank {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  desc      String 
-  user    User[]
+  id            Int      @id @default(autoincrement())
+  name          String   @unique
+  desc          String 
+  user          User[]
 }
 
 model Region {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  desc      String
-  user    User[]
+  id            Int      @id @default(autoincrement())
+  name          String   @unique
+  desc          String
+  user          User[]
   
 }
 
 model Notification {
-  id         Int              @id @default(autoincrement())
-  typeId     Int
-  timestamp  DateTime         @default(now())
-  senderId   Int
-  receiverId Int
+  id            Int              @id @default(autoincrement())
+  typeId        Int
+  senderId      Int
+  receiverId    Int
+  timestamp     DateTime         @default(now())
 
-  notiType   NotificationType @relation(fields: [typeId], references: [id])
-  sender     User             @relation("sender", fields: [senderId], references: [id])
-  receiver   User             @relation("receiver", fields: [receiverId], references: [id])
+  notiType      NotificationType @relation(fields: [typeId], references: [id])
+  sender        User             @relation("sender", fields: [senderId], references: [id])
+  receiver      User             @relation("receiver", fields: [receiverId], references: [id])
 }
 
 model NotificationType {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  desc      String
+  id            Int      @id @default(autoincrement())
+  name          String   @unique
+  desc          String
   notifications Notification[]
 }
 
 model Publication {
-  id        Int     @id @default(autoincrement())
-  authorId  Int     
-  text      String
-  likes     User[]
-  comments  Comment[]
-  tagged    User[]
+  id            Int     @id @default(autoincrement())
+  authorId      Int     
+  text          String
+  comments      Comment[]
+  reports       Report[]
+  likes         Like[]
+  tags          Tag[]
 
-  author    User    @relation(fields: [authorId], references: [id])
+  author        User    @relation("publicationAuthor", fields: [authorId], references: [id])
 }
 
 model Comment {
-  id         Int              @id @default(autoincrement())
-  timestamp  DateTime         @default(now())
-  creatorId  Int
-  publicationId Int
-
-  creator       User        @relation(fields: [creatorId], references: [id])
-  publication   Publication @relation(fields: [publicationId], references: [id])
+  id            Int              @id @default(autoincrement())
+  timestamp     DateTime         @default(now())
+  authorId      Int
+  publicationId Int?
+  commentId     Int?
+  tags          Tag[]
+  comment       Comment?    @relation("replies", fields: [commentId], references: [id])
+  replies       Comment[]   @relation("replies")
+  likes         Like[]
+  reports       Report[]
+  author        User        @relation("commentAuthor", fields: [authorId], references: [id])
+  publication   Publication? @relation(fields: [publicationId], references: [id])        
 }
