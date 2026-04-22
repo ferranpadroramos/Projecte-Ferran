@@ -186,6 +186,7 @@ model Comment {
   authorId      Int
   publicationId Int?
   commentId     Int?
+  text          String
   tags          Tag[]
   comment       Comment?    @relation("replies", fields: [commentId], references: [id])
   replies       Comment[]   @relation("replies")

@@ -8,7 +8,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState('')
 
     async function handleSubmit(){
-        await signIn('credentials', { email, password, callbackUrl: '/' })
+        await signIn('credentials', { email, password, callbackUrl: '/home' })
     }
 
     return (
