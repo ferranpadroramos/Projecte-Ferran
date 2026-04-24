@@ -13,11 +13,11 @@ export default function LoginPage() {
 
     return (
         <div>
-            <h1>LOG IN</h1>
+            <h1>INICIAR SESSIÓ</h1>
             <form>
                 <input type="email" name="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required /><br />
                 <input type="password" name="password" placeholder="Contrasenya" value={password} onChange={(e) => setPassword(e.target.value)} required /><br />
-                <button onClick={handleSubmit}>Log In</button>
+                <button onClick={handleSubmit}>Iniciar sessió</button>
             </form>
         </div>
     )

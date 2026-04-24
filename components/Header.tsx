@@ -15,13 +15,13 @@ export default function Header(){
             <input type="text" className="border rounded px-2 py-1"/>
           </div>
           
-          <Link href="/publicate">Publicate</Link>
-          <Link href="/reports">Reports</Link>
+          <Link href="/publicate">Publicar</Link>
+          <Link href="/reports">Reportes</Link>
 
           <nav className="flex">
-            <Link href="/notifications" className="border px-3 py-1 rounded-l-lg">Notifications</Link>
-            <Link href="/requests" className="border-y border-r px-3 py-1">Requests</Link>
-            <Link href="/messages" className="border-y border-r px-3 py-1 rounded-r-lg">Direct messages</Link>
+            <Link href="/notifications" className="border px-3 py-1 rounded-l-lg">Notificacions</Link>
+            <Link href="/requests" className="border-y border-r px-3 py-1">Sol·licituds</Link>
+            <Link href="/messages" className="border-y border-r px-3 py-1 rounded-r-lg">Missatges directes</Link>
           </nav>
 
           <div className="flex items-center gap-4">
