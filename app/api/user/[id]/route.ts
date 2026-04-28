@@ -3,9 +3,11 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    // Obtenir l'id de la ruta i la sessió activa
     const { id } = await params
     const session = await auth()
 
+    // Buscar l'usuari amb les seves relacions
     const user = await prisma.user.findUnique({
         where: { id: Number(id) },
         select: {
@@ -21,6 +23,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 
     const sessionId = Number(session?.user?.id)
 
+    // Comprovar si ja són amics
     const friendship = await prisma.friendship.findFirst({
         where: {
             OR: [
@@ -30,6 +33,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
         }
     })
 
+    // Comprovar si hi ha una sol·licitud d'amistat pendent
     const friendRequest = await prisma.friendRequest.findFirst({
         where: {
             senderId: sessionId,
@@ -38,7 +42,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
         }
     })
 
-
+    // Retornar l'usuari amb l'estat d'amistat
     return NextResponse.json({
         ...user,
         friendStatus: friendship ? 'friends' : friendRequest ? 'pending' : 'none'
