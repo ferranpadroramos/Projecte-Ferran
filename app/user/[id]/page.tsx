@@ -23,6 +23,29 @@ export default function UserPage() {
             .then(setUser)
     }, [id])
 
+    async function handleFriendAction() {
+    if (user.friendStatus === 'none') {
+        await fetch('/api/friend-request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ receiverId: user.id })
+        })
+    } else if (user.friendStatus === 'pending') {
+        await fetch('/api/friend-request', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ receiverId: user.id })
+        })
+    } else if (user.friendStatus === 'friends') {
+        await fetch('/api/friendship', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ friendId: user.id })
+        })
+    }
+}
+
+
     if (!user) return <p>Carregant...</p>
 
     return (
