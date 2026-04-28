@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { getServerSession } from "next-auth"
+import { auth } from "@/auth"
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
-    const session = await getServerSession()
+    const session = await auth()
 
     const user = await prisma.user.findUnique({
         where: { id: Number(id) },
