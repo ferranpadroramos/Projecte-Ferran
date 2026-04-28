@@ -28,8 +28,9 @@ export default function Header(){
             <Link href="/settings">
               <img src="/img/settings.png" alt="settings" className="cursor-pointer w-8 h-8" />
             </Link>
-            <Link href={`/user/${session?.user?.id}`}>
+            <Link href={`/user/${session?.user?.id}`} className="flex items-center gap-2">
               <img src="/img/profile.png" alt="profile" className="cursor-pointer w-8 h-8" />
+              <span>{session?.user?.name}</span>
             </Link>
             <button onClick={() => signOut({ callbackUrl: '/login' })}>
               <img src="/img/logout.png" alt="logOut" className="cursor-pointer w-8 h-8" />
