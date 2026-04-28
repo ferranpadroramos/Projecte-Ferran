@@ -8,7 +8,8 @@ export default function RegisterPage() {
     const [error, setError] = useState('')
     const [success, setSuccess] = useState(false)
 
-    async function handleSubmit() {
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault()
         const res = await fetch('/api/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -29,11 +30,11 @@ export default function RegisterPage() {
             <h1>REGISTRE</h1>
             {error && <p>{error}</p>}
             {success && <p>Registre completat amb èxit!</p>}
-            <form>
+            <form onSubmit={handleSubmit}>
                 <input type="text" placeholder="Usuari" value={username} onChange={(e) => setUsername(e.target.value)} required /><br />
                 <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required /><br />
                 <input type="password" placeholder="Contrasenya" value={password} onChange={(e) => setPassword(e.target.value)} required /><br />
-                <button onClick={handleSubmit}>Registrar-se</button>
+                <button type="submit">Registrar-se</button>
                 <a href="/login">Ja tens un compte? Inicia sessió</a>
             </form>
         </div>
