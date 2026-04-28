@@ -6,6 +6,7 @@ import { useSession, signOut } from 'next-auth/react'
 export default function Header(){
     const pathname = usePathname()
     const { data: session } = useSession()
+    console.log(session)
     if (['/login', '/register'].includes(pathname)) return null
     return <header className="flex items-center gap-4 h-16 bg-blue-100 px-4 justify-between">
           <Link href="/home" className="border px-3 py-1 rounded-lg">HOME</Link>
