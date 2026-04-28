@@ -21,7 +21,7 @@ export default function Header(){
           <nav className="flex">
             <Link href="/notifications" className="border px-3 py-1 rounded-l-lg">Notificacions</Link>
             <Link href="/requests" className="border-y border-r px-3 py-1">Sol·licituds</Link>
-            <Link href="/messages" className="border-y border-r px-3 py-1 rounded-r-lg">Missatges directes</Link>
+            <Link href="/messages" className="border-y border-r px-3 py-1 rounded-r-lg">Xat directe</Link>
           </nav>
 
           <div className="flex items-center gap-4">
