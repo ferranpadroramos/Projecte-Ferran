@@ -9,6 +9,7 @@ export default function LoginPage() {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
+        setError('')
         const res = await signIn('credentials', { email, password, redirect: false })
         if (res?.error) {
             setError('Email o contrasenya incorrectes')
