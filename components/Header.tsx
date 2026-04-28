@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 
 export default function Header(){
     const pathname = usePathname()
@@ -31,9 +31,9 @@ export default function Header(){
             <Link href={`/user/${session?.user?.id}`}>
               <img src="/img/profile.png" alt="profile" className="cursor-pointer w-8 h-8" />
             </Link>
-            <Link href="/api/auth/signout">
+            <button onClick={() => signOut({ callbackUrl: '/login' })}>
               <img src="/img/logout.png" alt="logOut" className="cursor-pointer w-8 h-8" />
-            </Link>
+            </button>
           </div>
         </header>
 }
