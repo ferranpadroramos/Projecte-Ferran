@@ -23,7 +23,20 @@ export default function UserPage() {
             .then(setUser)
     }, [id])
 
-    async function handleFriendAction() {
+    async function goToChat(e: React.SyntheticEvent) {
+        e.preventDefault()
+        await fetch('api/chat', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user?.id })
+        }
+        )
+    }
+
+    async function handleFriendAction(e: React.SyntheticEvent) {
+        e.preventDefault
+        if (!user) return
+
     if (user.friendStatus === 'none') {
         await fetch('/api/friend-request', {
             method: 'POST',
@@ -59,19 +72,20 @@ export default function UserPage() {
                 </div>
             )}
             <p>{user.region?.name ?? '-'}</p>
-
+            <form onSubmit={handleFriendAction}>
             {session?.user?.id !== String(user.id) && (
                 <>
-                    {user.friendStatus === 'none' && <button>Sol·licitar amistat</button>}
-                    {user.friendStatus === 'pending' && <button>Sol·licitud enviada</button>}
+                    {user.friendStatus === 'none' && <button type='submit'>Sol·licitar amistat</button>}
+                    {user.friendStatus === 'pending' && <button type='submit'>Sol·licitud enviada</button>}
                     {user.friendStatus === 'friends' && (
                         <>
-                            <button>Amics</button>
-                            <button>Anar al xat</button>
+                            <button type='submit'>Amics</button>
+                            <form onSubmit={goToChat}><button type='submit'>Anar al xat</button></form>
                         </>
                     )}
                 </>
             )}
+            </form>
         </div>
     )
 }

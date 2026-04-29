@@ -7,7 +7,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
 
-    async function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.SyntheticEvent) {
         e.preventDefault()
         setError('')
         const res = await signIn('credentials', { email, password, redirect: false })
