@@ -38,22 +38,16 @@ export default function UserPage() {
         if (!user) return
 
     if (user.friendStatus === 'none') {
-        await fetch('/api/friend-request', {
+        await fetch('/api/friendship', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ receiverId: user.id })
         })
-    } else if (user.friendStatus === 'pending') {
-        await fetch('/api/friend-request', {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ receiverId: user.id })
-        })
-    } else if (user.friendStatus === 'friends') {
+    } else {
         await fetch('/api/friendship', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ friendId: user.id })
+            body: JSON.stringify({ receiverId: user.id })
         })
     }
 }
