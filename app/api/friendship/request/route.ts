@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 
+export async function GET() {
+    const session = await auth()
+    const receiverId = Number(session?.user?.id)
+
+    const requests = await prisma.friendRequest.findMany({
+        where: { receiverId }
+    })
+}
+
 export async function POST(req: NextRequest) {
     try{
         //Agafar dades de la solicitud i comprovar que surti bé

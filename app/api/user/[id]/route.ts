@@ -37,8 +37,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
     const friendRequest = await prisma.friendRequest.findFirst({
         where: {
             senderId: sessionId,
-            receiverId: Number(id),
-            status: "PENDING"
+            receiverId: Number(id)
         }
     })
 
