@@ -5,7 +5,7 @@ import { auth } from "@/auth"
 export async function POST(req: NextRequest) {
     try{
         //Agafar dades de qui reb la solicitud i comprovar que surti bé
-        const receiverId = await req.json()
+        const { receiverId } = await req.json()
 
         if (!receiverId) 
         return NextResponse.json({ error: "Falta el destinatari" }, { status: 400 })

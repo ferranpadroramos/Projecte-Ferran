@@ -4,10 +4,10 @@ import { prisma } from "@/lib/prisma"
 
 export async function POST(req: NextRequest) {
     // Llegir dades del body
-    const { username, email, password } = await req.json()
+    const { username, email, password, rankId, regionId, roleIds } = await req.json()
 
     // Validar que no falten camps
-    if (!username || !email || !password)
+    if (!username || !email || !password || !rankId || !regionId || !roleIds)
         return NextResponse.json({ error: "Falten camps" }, { status: 400 })
 
     // Comprovar si l'email ja existeix
@@ -22,7 +22,15 @@ export async function POST(req: NextRequest) {
 
     // Encriptar la contrasenya i crear l'usuari
     const hashed = await bcrypt.hash(password, 10)
-    await prisma.user.create({ data: { username, email, password: hashed } })
+    await prisma.user.create({ data: {
+        username,
+        email,
+        password: hashed,
+        rankId,
+        regionId,
+        role: { connect: roleIds.map((id: number) => ({ id })) }
+    }
+ })
 
     return NextResponse.json({ ok: true }, { status: 201 })
 }

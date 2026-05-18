@@ -18,8 +18,8 @@ model User {
   email         String   @unique
   password      String
   isAdmin       Boolean  @default(false)
-  regionId      Int?
-  rankId        Int?
+  regionId      Int
+  rankId        Int
   
   role          Role[]
   likes         Like[]
@@ -37,8 +37,8 @@ model User {
   receivedNotifications Notification[] @relation("receiver")
   createdAt     DateTime @default(now())
 
-  rank          Rank?        @relation(fields: [rankId], references: [id])
-  region        Region?        @relation(fields: [regionId], references: [id])
+  rank          Rank         @relation(fields: [rankId], references: [id])
+  region        Region       @relation(fields: [regionId], references: [id])
   
 }
 

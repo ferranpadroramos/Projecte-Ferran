@@ -14,13 +14,13 @@ export default function RequestsPage() {
     const [requests, setRequests] = useState<Request[]>([])
 
     useEffect(() => {
-        fetch('/api/friend-request')
+        fetch('/api/friendship/requests')
             .then(res => res.json())
             .then(setRequests)
     }, [])
 
     async function handleAccept(id: number) {
-        await fetch('/api/friendship/accept', {
+        await fetch('/api/friendship/requests', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ solicitudId: id })
@@ -29,7 +29,7 @@ export default function RequestsPage() {
     }
 
     async function handleReject(id: number) {
-        await fetch('/api/friendship/accept', {
+        await fetch('/api/friendship/requests', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ solicitudId: id })

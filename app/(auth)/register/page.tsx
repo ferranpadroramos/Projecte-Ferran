@@ -1,12 +1,22 @@
 'use client'
 import { useState } from 'react'
+type Option = { id: number, name: string }
 
 export default function RegisterPage() {
     const [username, setUsername] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    
     const [error, setError] = useState('')
     const [success, setSuccess] = useState(false)
+
+    const [ranks, setRanks] = useState<Option[]>([])
+const [regions, setRegions] = useState<Option[]>([])
+const [roles, setRoles] = useState<Option[]>([])
+const [rankId, setRankId] = useState('')
+const [regionId, setRegionId] = useState('')
+const [roleIds, setRoleIds] = useState<number[]>([])
+
 
     async function handleSubmit(e: React.SyntheticEvent) {
         e.preventDefault()
