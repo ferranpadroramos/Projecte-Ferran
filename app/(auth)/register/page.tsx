@@ -1,22 +1,31 @@
 'use client'
-import { useState } from 'react'
-type Option = { id: number, name: string }
+import { useState, useEffect } from 'react'
+
+type Option = { id: number, name: string, desc: string }
 
 export default function RegisterPage() {
     const [username, setUsername] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    
     const [error, setError] = useState('')
     const [success, setSuccess] = useState(false)
 
+    // Opcions del formulari
     const [ranks, setRanks] = useState<Option[]>([])
     const [regions, setRegions] = useState<Option[]>([])
     const [roles, setRoles] = useState<Option[]>([])
+    
+    //Ids que es recullen per al registre
     const [rankId, setRankId] = useState('')
     const [regionId, setRegionId] = useState('')
     const [roleIds, setRoleIds] = useState<number[]>([])
 
+    // Carregar opcions de la BD
+    useEffect(() => {
+        fetch('/api/ranks').then(res => res.json()).then(setRanks)
+        fetch('/api/regions').then(res => res.json()).then(setRegions)
+        fetch('/api/roles').then(res => res.json()).then(setRoles)
+    }, [])
 
     async function handleSubmit(e: React.SyntheticEvent) {
         e.preventDefault()
@@ -25,7 +34,7 @@ export default function RegisterPage() {
         const res = await fetch('/api/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, email, password })
+            body: JSON.stringify({ username, email, password, rankId: Number(rankId), regionId: Number(regionId), roleIds })
         })
 
         if (!res.ok) {
@@ -46,6 +55,24 @@ export default function RegisterPage() {
                 <input type="text" placeholder="Usuari" value={username} onChange={(e) => setUsername(e.target.value)} required /><br />
                 <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required /><br />
                 <input type="password" placeholder="Contrasenya" value={password} onChange={(e) => setPassword(e.target.value)} required /><br />
+
+                {/* Selecció de rang */}
+                <select value={rankId} onChange={(e) => setRankId(e.target.value)} required>
+                    <option value="">Selecciona un rang</option>
+                    {ranks.map(r => <option key={r.id} value={r.id} title={r.desc}>{r.name}</option>)}
+                </select><br />
+
+                {/* Selecció de regió */}
+                <select value={regionId} onChange={(e) => setRegionId(e.target.value)} required>
+                    <option value="">Selecciona una regió</option>
+                    {regions.map(r => <option key={r.id} value={r.id} title={r.desc}>{r.name}</option>)}
+                </select><br />
+
+                {/* Selecció de rol (múltiple) */}
+                <select multiple value={roleIds.map(String)} onChange={(e) => setRoleIds(Array.from(e.target.selectedOptions, o => Number(o.value)))} required>
+                    {roles.map(r => <option key={r.id} value={r.id} title={r.desc}>{r.name}</option>)}
+                </select><br />
+
                 <button type="submit">Registrar-se</button>
                 <a href="/login">Ja tens un compte? Inicia sessió</a>
             </form>
