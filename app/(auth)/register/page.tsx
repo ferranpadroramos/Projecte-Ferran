@@ -11,11 +11,11 @@ export default function RegisterPage() {
     const [success, setSuccess] = useState(false)
 
     const [ranks, setRanks] = useState<Option[]>([])
-const [regions, setRegions] = useState<Option[]>([])
-const [roles, setRoles] = useState<Option[]>([])
-const [rankId, setRankId] = useState('')
-const [regionId, setRegionId] = useState('')
-const [roleIds, setRoleIds] = useState<number[]>([])
+    const [regions, setRegions] = useState<Option[]>([])
+    const [roles, setRoles] = useState<Option[]>([])
+    const [rankId, setRankId] = useState('')
+    const [regionId, setRegionId] = useState('')
+    const [roleIds, setRoleIds] = useState<number[]>([])
 
 
     async function handleSubmit(e: React.SyntheticEvent) {
