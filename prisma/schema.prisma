@@ -20,6 +20,7 @@ model User {
   isAdmin       Boolean  @default(false)
   regionId      Int
   rankId        Int
+  avatarUrl     String?
   
   role          Role[]
   likes         Like[]
@@ -166,6 +167,7 @@ model Publication {
   id            Int     @id @default(autoincrement())
   authorId      Int     
   text          String
+  imageUrl      String?
   comments      Comment[]
   reports       Report[]
   likes         Like[]
