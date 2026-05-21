@@ -68,10 +68,21 @@ export default function RegisterPage() {
                     {regions.map(r => <option key={r.id} value={r.id} title={r.desc}>{r.name}</option>)}
                 </select><br />
 
-                {/* Selecció de rol (múltiple) */}
-                <select multiple value={roleIds.map(String)} onChange={(e) => setRoleIds(Array.from(e.target.selectedOptions, o => Number(o.value)))} required>
-                    {roles.map(r => <option key={r.id} value={r.id} title={r.desc}>{r.name}</option>)}
-                </select><br />
+                {/* Selecció de rol (checkboxes) */}
+                {roles.map(r => (
+                    <label key={r.id} title={r.desc}>
+                        <input
+                            type="checkbox"
+                            value={r.id}
+                            checked={roleIds.includes(r.id)}
+                            onChange={(e) => {
+                                if (e.target.checked) setRoleIds([...roleIds, r.id])
+                                else setRoleIds(roleIds.filter(id => id !== r.id))
+                            }}
+                        />
+                        {r.name}
+                    </label>
+                ))}<br />
 
                 <button type="submit">Registrar-se</button>
                 <a href="/login">Ja tens un compte? Inicia sessió</a>
