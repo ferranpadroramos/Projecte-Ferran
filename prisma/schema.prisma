@@ -172,6 +172,7 @@ model Publication {
   reports       Report[]
   likes         Like[]
   tags          Tag[]
+  createdAt     DateTime @default(now())
 
   author        User    @relation("publicationAuthor", fields: [authorId], references: [id])
 }

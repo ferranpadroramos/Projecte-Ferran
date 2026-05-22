@@ -3,34 +3,40 @@ import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 
 export async function POST(req: NextRequest) {
-    // Llegir dades del body
-    const { username, email, password, rankId, regionId, roleIds } = await req.json()
+    try {
+        // Llegir dades del body
+        const { username, email, password, rankId, regionId, roleIds } = await req.json()
 
-    // Validar que no falten camps
-    if (!username || !email || !password || !rankId || !regionId || !roleIds)
-        return NextResponse.json({ error: "Falten camps" }, { status: 400 })
+        // Validar que no falten camps
+        if (!username || !email || !password || !rankId || !regionId || !roleIds?.length)
+            return NextResponse.json({ error: "Falten camps" }, { status: 400 })
 
-    // Comprovar si l'email ja existeix
-    const emailExists = await prisma.user.findUnique({ where: { email } })
-    if (emailExists)
-        return NextResponse.json({ error: "Aquest email ja està en ús" }, { status: 409 })
+        // Comprovar si l'email ja existeix
+        const emailExists = await prisma.user.findUnique({ where: { email } })
+        if (emailExists)
+            return NextResponse.json({ error: "Aquest email ja està en ús" }, { status: 409 })
 
-    // Comprovar si el nom d'usuari ja existeix
-    const usernameExists = await prisma.user.findUnique({ where: { username } })
-    if (usernameExists)
-        return NextResponse.json({ error: "Aquest nom d'usuari ja està en ús" }, { status: 409 })
+        // Comprovar si el nom d'usuari ja existeix
+        const usernameExists = await prisma.user.findUnique({ where: { username } })
+        if (usernameExists)
+            return NextResponse.json({ error: "Aquest nom d'usuari ja està en ús" }, { status: 409 })
 
-    // Encriptar la contrasenya i crear l'usuari
-    const hashed = await bcrypt.hash(password, 10)
-    await prisma.user.create({ data: {
-        username,
-        email,
-        password: hashed,
-        rankId,
-        regionId,
-        role: { connect: roleIds.map((id: number) => ({ id })) }
+        // Encriptar la contrasenya i crear l'usuari
+        const hashed = await bcrypt.hash(password, 10)
+        await prisma.user.create({
+            data: {
+                username,
+                email,
+                password: hashed,
+                rankId,
+                regionId,
+                role: { connect: roleIds.map((id: number) => ({ id })) }
+            }
+        })
+
+        return NextResponse.json({ ok: true }, { status: 201 })
+    } catch (error) {
+        console.error(error)
+        return NextResponse.json({ error: "Error del servidor" }, { status: 500 })
     }
- })
-
-    return NextResponse.json({ ok: true }, { status: 201 })
 }

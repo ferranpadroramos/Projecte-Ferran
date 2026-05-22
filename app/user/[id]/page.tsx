@@ -24,11 +24,16 @@ export default function UserPage() {
     const { data: session } = useSession()
     const [user, setUser] = useState<User | null>(null)
     const [friendStatus, setFriendStatus] = useState<'none' | 'pending' | 'friends'>('none')
+    const [notFound, setNotFound] = useState(false)
 
     useEffect(() => {
         fetch(`/api/user/${id}`)
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) { setNotFound(true); return }
+                return res.json()
+            })
             .then((data: User) => {
+                if (!data) return
                 setUser(data)
                 setFriendStatus(data.friendStatus)
             })
@@ -53,6 +58,7 @@ export default function UserPage() {
         }
     }
 
+    if (notFound) return <p>Usuari no trobat</p>
     if (!user) return <p className="text-center mt-10 text-gray-400">Carregant...</p>
 
     const isOwnProfile = session?.user?.id === String(user.id)
