@@ -41,9 +41,22 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
         }
     })
 
-    // Retornar l'usuari amb l'estat d'amistat
+    // Obtenir les publicacions de l'usuari
+    const publications = await prisma.publication.findMany({
+        where: { authorId: Number(id) },
+        select: {
+            id: true,
+            text: true,
+            imageUrl: true,
+            likes: { select: { id: true } }
+        },
+        orderBy: { id: 'desc' }
+    })
+
+    // Retornar l'usuari amb l'estat d'amistat i les publicacions
     return NextResponse.json({
         ...user,
-        friendStatus: friendship ? 'friends' : friendRequest ? 'pending' : 'none'
+        friendStatus: friendship ? 'friends' : friendRequest ? 'pending' : 'none',
+        publications: publications.map(p => ({ ...p, likes: p.likes.length }))
     })
 }

@@ -11,13 +11,8 @@ type User = {
     role: { name: string }[]
     friendStatus: 'none' | 'pending' | 'friends'
     avatarUrl: string | null
+    publications: { id: number, text: string, imageUrl: string | null, likes: number }[]
 }
-
-// TODO: substituir per crida a API quan la BD estigui llesta
-const MOCK_PUBLICATIONS = [
-    { id: 1, text: "Primera publicació!", imageUrl: null, likes: 5 },
-    { id: 2, text: "Segon post 🎮", imageUrl: "https://placehold.co/300x200", likes: 3 },
-]
 
 export default function UserPage() {
     const { id } = useParams()
@@ -122,7 +117,10 @@ export default function UserPage() {
             {/* Publicacions del perfil */}
             <div className="flex flex-col gap-3">
                 <h2 className="font-semibold text-gray-700">Publicacions</h2>
-                {MOCK_PUBLICATIONS.map(pub => (
+                {user.publications.length === 0 && (
+                    <p className="text-sm text-gray-400">Encara no hi ha publicacions</p>
+                )}
+                {user.publications.map(pub => (
                     <div key={pub.id} className="border rounded-xl p-4 flex flex-col gap-2 shadow-sm">
                         <p className="text-sm">{pub.text}</p>
                         {pub.imageUrl && (
