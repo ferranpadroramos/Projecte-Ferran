@@ -149,11 +149,15 @@ model Notification {
   typeId        Int
   senderId      Int
   receiverId    Int
+  publicationId Int?
+  commentId     Int?
   timestamp     DateTime         @default(now())
 
   notiType      NotificationType @relation(fields: [typeId], references: [id])
   sender        User             @relation("sender", fields: [senderId], references: [id])
   receiver      User             @relation("receiver", fields: [receiverId], references: [id])
+  publication   Publication?     @relation(fields: [publicationId], references: [id])
+  comment       Comment?         @relation(fields: [commentId], references: [id])
 }
 
 model NotificationType {
@@ -172,6 +176,7 @@ model Publication {
   reports       Report[]
   likes         Like[]
   tags          Tag[]
+  notifications Notification[]
   createdAt     DateTime @default(now())
 
   author        User    @relation("publicationAuthor", fields: [authorId], references: [id])
@@ -189,6 +194,7 @@ model Comment {
   replies       Comment[]   @relation("replies")
   likes         Like[]
   reports       Report[]
+  notifications Notification[]
   author        User        @relation("commentAuthor", fields: [authorId], references: [id])
   publication   Publication? @relation(fields: [publicationId], references: [id])        
 }
