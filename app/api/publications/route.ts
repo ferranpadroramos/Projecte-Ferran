@@ -7,26 +7,32 @@ export async function GET() {
         const session = await auth()
         const userId = Number(session?.user?.id)
 
-        // Obtenir totes les publicacions amb autor, likes i comentaris
+        // Obtenir totes les publicacions amb autor, likes, comentaris i etiquetes
         const publications = await prisma.publication.findMany({
-            where: { authorId: { not: userId } },
             orderBy: { createdAt: 'desc' },
             select: {
                 id: true,
                 text: true,
+                imageUrl: true,
                 createdAt: true,
-                author: { select: { id: true, username: true } },
+                author: { select: { id: true, username: true, avatarUrl: true } },
                 likes: { select: { userId: true } },
-                comments: { select: { id: true } }
+                comments: { select: { id: true } },
+                tags: { select: { tagged: { select: { username: true } } } }
             }
         })
 
         // Afegir recompte de likes, comentaris i si l'usuari ha donat like
         return NextResponse.json(publications.map(p => ({
-            ...p,
+            id: p.id,
+            text: p.text,
+            imageUrl: p.imageUrl,
+            createdAt: p.createdAt,
+            author: p.author,
             likeCount: p.likes.length,
             commentCount: p.comments.length,
-            likedByMe: p.likes.some(l => l.userId === userId)
+            likedByMe: p.likes.some(l => l.userId === userId),
+            tags: p.tags.map(t => t.tagged.username)
         })))
     } catch {
         return NextResponse.json({ error: "Error del servidor" }, { status: 500 })

@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import ConfirmModal from '@/components/ui/ConfirmModal'
+import ContentMenu from '@/components/ui/ContentMenu'
 
 type User = {
     id: number
@@ -20,6 +22,7 @@ export default function UserPage() {
     const [user, setUser] = useState<User | null>(null)
     const [friendStatus, setFriendStatus] = useState<'none' | 'pending' | 'friends'>('none')
     const [notFound, setNotFound] = useState(false)
+    const [showConfirm, setShowConfirm] = useState(false)
 
     useEffect(() => {
         fetch(`/api/user/${id}`)
@@ -37,6 +40,7 @@ export default function UserPage() {
     async function handleFriendAction() {
         if (!user) return
         if (friendStatus === 'none') {
+            // Enviar sol·licitud directament sense confirmació
             await fetch('/api/friendship', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -44,13 +48,20 @@ export default function UserPage() {
             })
             setFriendStatus('pending')
         } else {
-            await fetch('/api/friendship', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ receiverId: user.id })
-            })
-            setFriendStatus('none')
+            // Cancel·lar sol·licitud o eliminar amistat — demanar confirmació
+            setShowConfirm(true)
         }
+    }
+
+    async function confirmFriendAction() {
+        if (!user) return
+        await fetch('/api/friendship', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ receiverId: user.id })
+        })
+        setFriendStatus('none')
+        setShowConfirm(false)
     }
 
     if (notFound) return <p>Usuari no trobat</p>
@@ -95,7 +106,7 @@ export default function UserPage() {
                         onClick={handleFriendAction}
                         className={`px-4 py-2 rounded text-sm font-medium ${
                             friendStatus === 'none' ? 'bg-blue-500 text-white hover:bg-blue-600' :
-                            friendStatus === 'pending' ? 'bg-gray-200 text-gray-600' :
+                            friendStatus === 'pending' ? 'bg-gray-200 text-gray-600 hover:bg-red-100 hover:text-red-600' :
                             'bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-600'
                         }`}
                     >
@@ -122,7 +133,15 @@ export default function UserPage() {
                 )}
                 {user.publications.map(pub => (
                     <div key={pub.id} className="border rounded-xl p-4 flex flex-col gap-2 shadow-sm">
-                        <p className="text-sm">{pub.text}</p>
+                        <div className="flex justify-between items-start">
+                            <p className="text-sm flex-1">{pub.text}</p>
+                            {/* Menú d'opcions a les publicacions del perfil */}
+                            <ContentMenu
+                                isOwner={isOwnProfile}
+                                publicationId={pub.id}
+                                onDelete={() => setUser(prev => prev ? { ...prev, publications: prev.publications.filter(p => p.id !== pub.id) } : prev)}
+                            />
+                        </div>
                         {pub.imageUrl && (
                             <img src={pub.imageUrl} alt="pub" className="rounded-lg w-full object-cover max-h-48" />
                         )}
@@ -130,6 +149,19 @@ export default function UserPage() {
                     </div>
                 ))}
             </div>
+
+            {/* Modal de confirmació per cancel·lar sol·licitud o eliminar amistat */}
+            {showConfirm && (
+                <ConfirmModal
+                    message={
+                        friendStatus === 'pending'
+                            ? `Vols cancel·lar la sol·licitud enviada a @${user.username}?`
+                            : `Vols eliminar @${user.username} dels teus amics?`
+                    }
+                    onConfirm={confirmFriendAction}
+                    onCancel={() => setShowConfirm(false)}
+                />
+            )}
         </div>
     )
 }
