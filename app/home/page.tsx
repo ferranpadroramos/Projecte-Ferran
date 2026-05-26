@@ -44,22 +44,19 @@ export default function HomePage() {
     }
 
     return (
-        <div className="max-w-xl mx-auto mt-6 flex flex-col gap-4 px-4">
+        <div className="page">
             {publications.map(pub => (
-                <div key={pub.id} className="border rounded-xl p-4 flex flex-col gap-3 shadow-sm">
-
-                    {/* Capçalera: avatar + nom + data + menú */}
+                <div key={pub.id} className="card flex flex-col gap-3">
                     <div className="flex items-center gap-3">
                         <Link href={`/user/${pub.author.id}`}>
-                            <img src={pub.author.avatarUrl ?? "/img/profile.png"} alt={pub.author.username} className="w-10 h-10 rounded-full object-cover border" />
+                            <img src={pub.author.avatarUrl ?? "/img/profile.png"} alt={pub.author.username} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
                         </Link>
                         <div className="flex-1">
-                            <Link href={`/user/${pub.author.id}`} className="font-semibold hover:underline">
+                            <Link href={`/user/${pub.author.id}`} className="font-semibold text-sm hover:text-[#FF4655] transition-colors">
                                 @{pub.author.username}
                             </Link>
                             <p className="text-xs text-gray-400">{new Date(pub.createdAt).toLocaleDateString()}</p>
                         </div>
-                        {/* Menú d'opcions (esborrar/editar si és propi, veure perfil/reportar si no) */}
                         <ContentMenu
                             isOwner={session?.user?.id === String(pub.author.id)}
                             authorId={pub.author.id}
@@ -69,30 +66,27 @@ export default function HomePage() {
                             onEdit={newText => setPublications(prev => prev.map(p => p.id === pub.id ? { ...p, text: newText } : p))}
                         />
                     </div>
-
-                    {/* Text de la publicació */}
                     <p className="text-sm">{pub.text}</p>
-
-                    {/* Etiquetes */}
                     {pub.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                             {pub.tags.map(tag => (
-                                <span key={tag} className="text-xs text-blue-500">@{tag}</span>
+                                <span key={tag} className="text-xs text-[#FF4655] font-medium">@{tag}</span>
                             ))}
                         </div>
                     )}
-
-                    {/* Imatge si n'hi ha */}
                     {pub.imageUrl && (
                         <img src={pub.imageUrl} alt="publicació" className="rounded-lg w-full object-cover max-h-64" />
                     )}
-
-                    {/* Accions: like i comentaris */}
-                    <div className="flex gap-4 text-sm text-gray-500">
-                        <button onClick={() => handleLike(pub.id, pub.likedByMe)} className={`flex items-center gap-1 hover:text-red-500 ${pub.likedByMe ? "text-red-500" : ""}`}>
+                    <div className="flex gap-4 text-sm text-gray-400 pt-1 border-t border-gray-50">
+                        <button
+                            onClick={() => handleLike(pub.id, pub.likedByMe)}
+                            className={`flex items-center gap-1.5 transition-colors hover:text-[#FF4655] ${pub.likedByMe ? "text-[#FF4655]" : ""}`}
+                        >
                             {pub.likedByMe ? "❤️" : "🤍"} {pub.likeCount}
                         </button>
-                        <span className="flex items-center gap-1">💬 {pub.commentCount}</span>
+                        <Link href={`/publication/${pub.id}`} className="flex items-center gap-1.5 hover:text-[#FF4655] transition-colors">
+                            💬 {pub.commentCount}
+                        </Link>
                     </div>
                 </div>
             ))}

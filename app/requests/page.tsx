@@ -43,47 +43,28 @@ export default function RequestsPage() {
     }
 
     return (
-        <div className="max-w-xl mx-auto mt-6 px-4 flex flex-col gap-4">
+        <div className="page">
             <h1 className="text-xl font-bold">Sol·licituds d'amistat</h1>
-
             {requests.length === 0 && (
                 <p className="text-sm text-gray-400 text-center mt-10">No tens sol·licituds pendents</p>
             )}
-
             {requests.map(r => (
-                <div key={r.id} className="border rounded-xl p-4 flex items-center gap-3 shadow-sm">
+                <div key={r.id} className="card flex items-center gap-3">
                     <Link href={`/user/${r.sender.id}`}>
-                        <img
-                            src={r.sender.avatarUrl ?? '/img/profile.png'}
-                            alt={r.sender.username}
-                            className="w-12 h-12 rounded-full object-cover border"
-                        />
+                        <img src={r.sender.avatarUrl ?? '/img/profile.png'} alt={r.sender.username} className="w-12 h-12 rounded-full object-cover border border-gray-200" />
                     </Link>
                     <div className="flex-1">
-                        <Link href={`/user/${r.sender.id}`} className="font-semibold hover:underline">
+                        <Link href={`/user/${r.sender.id}`} className="font-semibold text-sm hover:text-[#FF4655] transition-colors">
                             @{r.sender.username}
                         </Link>
-                        {r.sender.rank && (
-                            <p className="text-xs text-gray-400">{r.sender.rank.name}</p>
-                        )}
+                        {r.sender.rank && <p className="text-xs text-gray-400">{r.sender.rank.name}</p>}
                     </div>
                     <div className="flex gap-2">
-                        <button
-                            onClick={() => handleAccept(r.id)}
-                            className="bg-blue-500 text-white text-sm px-3 py-1.5 rounded hover:bg-blue-600"
-                        >
-                            Acceptar
-                        </button>
-                        <button
-                            onClick={() => setRejectId(r.id)}
-                            className="border text-sm px-3 py-1.5 rounded hover:bg-gray-50 text-gray-600"
-                        >
-                            Rebutjar
-                        </button>
+                        <button onClick={() => handleAccept(r.id)} className="btn btn-primary text-sm px-4 py-1.5">Acceptar</button>
+                        <button onClick={() => setRejectId(r.id)} className="btn btn-ghost text-sm px-4 py-1.5">Rebutjar</button>
                     </div>
                 </div>
             ))}
-
             {rejectId && (
                 <ConfirmModal
                     message="Vols rebutjar aquesta sol·licitud?"

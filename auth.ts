@@ -10,14 +10,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         signIn: '/login'
     },
     callbacks: {
-        // Guardar l'id de l'usuari al token JWT
         jwt({ token, user }) {
             if (user) token.id = user.id
             return token
         },
-        // Exposar l'id a la sessió
-        session({ session, token }) {
+        async session({ session, token }) {
             session.user.id = token.id as string
+            // Obtenir isAdmin de la BD i afegir-lo a la sessió
+            const dbUser = await prisma.user.findUnique({
+                where: { id: Number(token.id) },
+                select: { isAdmin: true }
+            })
+            ;(session.user as { isAdmin?: boolean }).isAdmin = dbUser?.isAdmin ?? false
             return session
         }
     },

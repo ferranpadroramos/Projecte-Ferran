@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
                 password: hashed,
                 rankId,
                 regionId,
+                isAdmin: email === process.env.ADMIN_EMAIL,
                 role: { connect: roleIds.map((id: number) => ({ id })) }
             }
         })

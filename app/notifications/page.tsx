@@ -67,37 +67,24 @@ export default function NotificationsPage() {
     if (loading) return <p className="text-center mt-10 text-gray-400">Carregant...</p>
 
     return (
-        <div className="max-w-xl mx-auto mt-6 flex flex-col gap-3 px-4">
-            <h1 className="text-xl font-bold mb-2">Notificacions</h1>
-
+        <div className="page">
+            <h1 className="text-xl font-bold">Notificacions</h1>
             {notifications.length === 0 && (
                 <p className="text-sm text-gray-400 text-center mt-10">No tens notificacions</p>
             )}
-
             {notifications.map(noti => {
                 const link = getNotiLink(noti.notiType.name, noti.publication, noti.comment, noti.sender.id)
                 return (
                     <Link href={link} key={noti.id}>
-                        <div className="border rounded-xl p-4 flex items-center gap-3 shadow-sm hover:bg-gray-50">
-
-                            {/* Avatar del sender */}
-                            <img
-                                src={noti.sender.avatarUrl ?? "/img/profile.png"}
-                                alt={noti.sender.username}
-                                className="w-10 h-10 rounded-full object-cover border flex-shrink-0"
-                            />
-
-                            {/* Text de la notificació */}
+                        <div className="card flex items-center gap-3 hover:border-[#FF4655] transition-colors">
+                            <img src={noti.sender.avatarUrl ?? "/img/profile.png"} alt={noti.sender.username} className="w-10 h-10 rounded-full object-cover border border-gray-200 flex-shrink-0" />
                             <div className="flex flex-col flex-1 min-w-0">
                                 <p className="text-sm">
                                     <span className="font-semibold">@{noti.sender.username}</span>
                                     {" "}{getNotiText(noti.notiType.name, noti.publication, noti.comment)}
                                 </p>
-                                {/* Context: text de la publicació relacionada */}
                                 {noti.publication && (
-                                    <p className="text-xs text-gray-400 truncate mt-0.5">
-                                        "{noti.publication.text}"
-                                    </p>
+                                    <p className="text-xs text-gray-400 truncate mt-0.5">"{noti.publication.text}"</p>
                                 )}
                                 <span className="text-xs text-gray-400 mt-0.5">{formatDate(noti.timestamp)}</span>
                             </div>

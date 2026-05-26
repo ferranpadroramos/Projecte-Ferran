@@ -70,30 +70,16 @@ export default function UserPage() {
     const isOwnProfile = session?.user?.id === String(user.id)
 
     return (
-        <div className="max-w-xl mx-auto mt-8 px-4 flex flex-col gap-6">
-
-            {/* Capçalera del perfil */}
-            <div className="flex items-center gap-5">
-                <img
-                    src={user.avatarUrl ?? "/img/profile.png"}
-                    alt={user.username}
-                    className="w-20 h-20 rounded-full object-cover border"
-                />
+        <div className="page">
+            <div className="card flex items-center gap-5">
+                <img src={user.avatarUrl ?? "/img/profile.png"} alt={user.username} className="w-20 h-20 rounded-full object-cover border-2 border-gray-200" />
                 <div className="flex flex-col gap-1">
                     <h1 className="text-xl font-bold">@{user.username}</h1>
                     <p className="text-sm text-gray-500">{user.region?.name ?? "Sense regió"}</p>
-                    {/* Rang */}
-                    {user.rank && (
-                        <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full w-fit">
-                            {user.rank.name}
-                        </span>
-                    )}
-                    {/* Rols */}
+                    {user.rank && <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full w-fit">{user.rank.name}</span>}
                     <div className="flex gap-1 flex-wrap">
                         {user.role.map(r => (
-                            <span key={r.name} className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                                {r.name}
-                            </span>
+                            <span key={r.name} className="text-xs bg-[#fff0f1] text-[#FF4655] px-2 py-0.5 rounded-full">{r.name}</span>
                         ))}
                     </div>
                 </div>
@@ -101,26 +87,24 @@ export default function UserPage() {
 
             {/* Botons d'acció */}
             {!isOwnProfile && (
-                <div className="flex gap-3">
-                    <button
-                        onClick={handleFriendAction}
-                        className={`px-4 py-2 rounded text-sm font-medium ${
-                            friendStatus === 'none' ? 'bg-blue-500 text-white hover:bg-blue-600' :
-                            friendStatus === 'pending' ? 'bg-gray-200 text-gray-600 hover:bg-red-100 hover:text-red-600' :
-                            'bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-600'
-                        }`}
-                    >
-                        {friendStatus === 'none' && 'Sol·licitar amistat'}
-                        {friendStatus === 'pending' && 'Sol·licitud enviada'}
-                        {friendStatus === 'friends' && 'Amics ✓'}
-                    </button>
+                <div className="flex gap-3 flex-wrap">
+                    {friendStatus === 'none' && (
+                        <button onClick={handleFriendAction} className="btn btn-primary">
+                            + Sol·licitar amistat
+                        </button>
+                    )}
+                    {friendStatus === 'pending' && (
+                        <>
+                            <button className="btn btn-secondary" disabled>Sol·licitud enviada</button>
+                            <button onClick={handleFriendAction} className="btn btn-danger">Cancel·lar sol·licitud</button>
+                        </>
+                    )}
                     {friendStatus === 'friends' && (
-                        <a
-                            href={`/chat/${user.id}`}
-                            className="px-4 py-2 rounded text-sm font-medium bg-gray-100 hover:bg-gray-200"
-                        >
-                            💬 Xat
-                        </a>
+                        <>
+                            <span className="btn btn-secondary pointer-events-none">✓ Amics</span>
+                            <a href={`/chat/${user.id}`} className="btn btn-primary">💬 Xat</a>
+                            <button onClick={handleFriendAction} className="btn btn-danger">Eliminar amic</button>
+                        </>
                     )}
                 </div>
             )}
@@ -132,10 +116,9 @@ export default function UserPage() {
                     <p className="text-sm text-gray-400">Encara no hi ha publicacions</p>
                 )}
                 {user.publications.map(pub => (
-                    <div key={pub.id} className="border rounded-xl p-4 flex flex-col gap-2 shadow-sm">
+                    <div key={pub.id} className="card flex flex-col gap-2">
                         <div className="flex justify-between items-start">
                             <p className="text-sm flex-1">{pub.text}</p>
-                            {/* Menú d'opcions a les publicacions del perfil */}
                             <ContentMenu
                                 isOwner={isOwnProfile}
                                 authorId={user.id}
@@ -145,15 +128,11 @@ export default function UserPage() {
                                 onEdit={newText => setUser(prev => prev ? { ...prev, publications: prev.publications.map(p => p.id === pub.id ? { ...p, text: newText } : p) } : prev)}
                             />
                         </div>
-                        {pub.imageUrl && (
-                            <img src={pub.imageUrl} alt="pub" className="rounded-lg w-full object-cover max-h-48" />
-                        )}
+                        {pub.imageUrl && <img src={pub.imageUrl} alt="pub" className="rounded-lg w-full object-cover max-h-48" />}
                         <span className="text-xs text-gray-400">❤️ {pub.likes}</span>
                     </div>
                 ))}
             </div>
-
-            {/* Modal de confirmació per cancel·lar sol·licitud o eliminar amistat */}
             {showConfirm && (
                 <ConfirmModal
                     message={

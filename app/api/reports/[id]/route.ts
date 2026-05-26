@@ -2,22 +2,15 @@ import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 
-// PATCH /api/reports/[id] — Respondre un report (acceptar o rebutjar) amb notificació opcional
+// PATCH /api/reports/[id] — Editar motius (usuari) o respondre (admin)
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const session = await auth()
     if (!session?.user?.id) return NextResponse.json({ error: "No autenticat" }, { status: 401 })
 
-    // Comprovar que és admin
-    const admin = await prisma.user.findUnique({ where: { id: Number(session.user.id) }, select: { isAdmin: true } })
-    if (!admin?.isAdmin) return NextResponse.json({ error: "No autoritzat" }, { status: 403 })
-
     const { id } = await params
-    const { status, adminComment, deleteContent, notifyCreator, notifyText } = await req.json()
+    const body = await req.json()
+    const userId = Number(session.user.id)
 
-    if (!["accepted", "rejected"].includes(status))
-        return NextResponse.json({ error: "Estat invàlid" }, { status: 400 })
-
-    // Obtenir el report amb el contingut relacionat
     const report = await prisma.report.findUnique({
         where: { id: Number(id) },
         include: {
@@ -27,7 +20,22 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     })
     if (!report) return NextResponse.json({ error: "Report no trobat" }, { status: 404 })
 
-    // Actualitzar l'estat del report
+    // Si ve "reasons", és una edició de l'usuari (només si és el seu report i està pendent)
+    if (body.reasons) {
+        if (report.authorId !== userId) return NextResponse.json({ error: "No autoritzat" }, { status: 403 })
+        if (report.status !== "pending") return NextResponse.json({ error: "Només es poden editar reports pendents" }, { status: 400 })
+        await prisma.report.update({ where: { id: Number(id) }, data: { reasons: body.reasons } })
+        return NextResponse.json({ ok: true })
+    }
+
+    // Si ve "status", és una resposta de l'admin
+    const admin = await prisma.user.findUnique({ where: { id: userId }, select: { isAdmin: true } })
+    if (!admin?.isAdmin) return NextResponse.json({ error: "No autoritzat" }, { status: 403 })
+
+    const { status, adminComment, deleteContent, notifyCreator, notifyText } = body
+    if (!["accepted", "rejected"].includes(status))
+        return NextResponse.json({ error: "Estat invàlid" }, { status: 400 })
+
     await prisma.report.update({
         where: { id: Number(id) },
         data: { status, adminComment: adminComment ?? null, resolvedAt: new Date() }
@@ -35,23 +43,18 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     const contentAuthorId = report.publication?.authorId ?? report.comment?.authorId
 
-    // Esborrar el contingut si l'admin ho ha indicat (només en acceptar)
     if (deleteContent && status === "accepted") {
-        if (report.publicationId) {
-            await prisma.publication.delete({ where: { id: report.publicationId } })
-        } else if (report.commentId) {
-            await prisma.comment.delete({ where: { id: report.commentId } })
-        }
+        if (report.publicationId) await prisma.publication.delete({ where: { id: report.publicationId } })
+        else if (report.commentId) await prisma.comment.delete({ where: { id: report.commentId } })
     }
 
-    // Notificar al creador si s'ha indicat i hi ha text
     if (notifyCreator && notifyText?.trim() && contentAuthorId) {
         const notiType = await prisma.notificationType.findUnique({ where: { name: "report" } })
         if (notiType) {
             await prisma.notification.create({
                 data: {
                     typeId: notiType.id,
-                    senderId: Number(session.user.id),
+                    senderId: userId,
                     receiverId: contentAuthorId,
                     publicationId: report.publicationId ?? null,
                     commentId: report.commentId ?? null
@@ -60,5 +63,21 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         }
     }
 
+    return NextResponse.json({ ok: true })
+}
+
+// DELETE /api/reports/[id] — Eliminar un report propi
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+    const session = await auth()
+    if (!session?.user?.id) return NextResponse.json({ error: "No autenticat" }, { status: 401 })
+
+    const { id } = await params
+    const userId = Number(session.user.id)
+
+    const report = await prisma.report.findUnique({ where: { id: Number(id) } })
+    if (!report) return NextResponse.json({ error: "No trobat" }, { status: 404 })
+    if (report.authorId !== userId) return NextResponse.json({ error: "No autoritzat" }, { status: 403 })
+
+    await prisma.report.delete({ where: { id: Number(id) } })
     return NextResponse.json({ ok: true })
 }

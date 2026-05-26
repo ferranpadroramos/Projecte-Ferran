@@ -55,7 +55,11 @@ export default function RegisterPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
             <div className="bg-white rounded-xl shadow-sm border p-8 w-full max-w-sm flex flex-col gap-5">
-                <h1 className="text-2xl font-bold text-center">Registre</h1>
+                <div className="flex flex-col items-center gap-2">
+                    <img id="logo" src="/img/logo.png" alt="Social Valorant" className="h-12 w-12 object-contain" />
+                    <h1 className="text-xl font-bold text-[#FF4655]">SOCIAL VALORANT</h1>
+                    <p className="text-sm text-gray-400">Crea el teu compte</p>
+                </div>
                 {error && <p className="text-red-500 text-sm text-center">{error}</p>}
                 <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                     <input type="text" placeholder="Usuari" value={username} onChange={e => setUsername(e.target.value)} required className="border rounded px-3 py-2 text-sm" />

@@ -2,16 +2,18 @@ import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 
-// GET /api/reports — Obtenir tots els reports (només admin)
+// GET /api/reports — Admin: tots els reports. Usuari: els seus propis
 export async function GET() {
     const session = await auth()
     if (!session?.user?.id) return NextResponse.json({ error: "No autenticat" }, { status: 401 })
 
-    // Comprovar que l'usuari és admin
-    const user = await prisma.user.findUnique({ where: { id: Number(session.user.id) }, select: { isAdmin: true } })
-    if (!user?.isAdmin) return NextResponse.json({ error: "No autoritzat" }, { status: 403 })
+    const userId = Number(session.user.id)
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { isAdmin: true } })
+
+    const where = user?.isAdmin ? {} : { authorId: userId }
 
     const reports = await prisma.report.findMany({
+        where,
         orderBy: { createdAt: "desc" },
         select: {
             id: true,

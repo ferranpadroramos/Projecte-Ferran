@@ -85,92 +85,58 @@ export default function PublicatePage() {
     }
 
     return (
-        <div className="max-w-xl mx-auto mt-10 p-4">
-            <h1 className="text-xl font-bold mb-4">Nova publicació</h1>
+        <div className="page">
+            <h1 className="text-xl font-bold">Nova publicació</h1>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
-                {/* Textarea per escriure el text */}
                 <textarea
                     value={text}
                     onChange={e => setText(e.target.value)}
                     placeholder="Què vols publicar?"
                     rows={4}
-                    className="border rounded p-2 resize-none"
+                    className="input resize-none"
                 />
-
-                {/* Secció d'imatge */}
                 <div className="flex flex-col gap-2">
-                    <label className="font-medium text-sm">Imatge (opcional)</label>
-                    {/* Mostrar previsualització si hi ha imatge seleccionada */}
+                    <label className="text-sm font-medium text-gray-600">Imatge (opcional)</label>
                     {imagePreview ? (
                         <div className="relative w-fit">
-                            <img src={imagePreview} alt="preview" className="max-h-48 rounded border object-cover" />
-                            <button
-                                type="button"
-                                onClick={removeImage}
-                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center"
-                            >✕</button>
+                            <img src={imagePreview} alt="preview" className="max-h-48 rounded-lg border border-gray-200 object-cover" />
+                            <button type="button" onClick={removeImage} className="absolute top-1 right-1 bg-[#FF4655] text-white rounded-full w-6 h-6 text-xs flex items-center justify-center hover:bg-[#e03040]">✕</button>
                         </div>
                     ) : (
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className="text-sm"
-                        />
+                        <input type="file" accept="image/*" onChange={handleImageChange} className="text-sm text-gray-500 file:mr-3 file:btn file:btn-secondary file:cursor-pointer" />
                     )}
                 </div>
-
-                {/* Secció d'etiquetes d'amics */}
                 <div className="flex flex-col gap-2">
-                    <label className="font-medium text-sm">Etiquetar amics (opcional)</label>
-                    <input
-                        type="text"
-                        placeholder="Cerca un amic..."
-                        value={friendSearch}
-                        onChange={e => setFriendSearch(e.target.value)}
-                        className="border rounded px-2 py-1 text-sm"
-                    />
-                    {/* Llista d'amics filtrats */}
+                    <label className="text-sm font-medium text-gray-600">Etiquetar amics (opcional)</label>
+                    <input type="text" placeholder="Cerca un amic..." value={friendSearch} onChange={e => setFriendSearch(e.target.value)} className="input" />
                     {friendSearch && (
-                        <ul className="border rounded divide-y text-sm">
-                            {filteredFriends.length === 0 && (
-                                <li className="px-3 py-2 text-gray-400">Cap resultat</li>
-                            )}
+                        <ul className="card p-0 overflow-hidden divide-y divide-gray-50">
+                            {filteredFriends.length === 0 && <li className="px-3 py-2 text-sm text-gray-400">Cap resultat</li>}
                             {filteredFriends.map(friend => (
-                                <li
-                                    key={friend.id}
-                                    onClick={() => toggleTag(friend.id)}
-                                    className={`px-3 py-2 cursor-pointer flex justify-between items-center hover:bg-gray-50 ${taggedIds.includes(friend.id) ? "bg-blue-50" : ""}`}
-                                >
+                                <li key={friend.id} onClick={() => toggleTag(friend.id)}
+                                    className={`px-3 py-2 cursor-pointer flex justify-between items-center text-sm transition-colors hover:bg-gray-50 ${taggedIds.includes(friend.id) ? 'bg-[#fff0f1] text-[#FF4655]' : ''}`}>
                                     <span>@{friend.username}</span>
-                                    {/* Checkmark si està etiquetat */}
-                                    {taggedIds.includes(friend.id) && <span className="text-blue-500">✓</span>}
+                                    {taggedIds.includes(friend.id) && <span className="text-[#FF4655] font-bold">✓</span>}
                                 </li>
                             ))}
                         </ul>
                     )}
-                    {/* Mostrar els amics etiquetats */}
                     {taggedIds.length > 0 && (
                         <div className="flex flex-wrap gap-2">
                             {taggedIds.map(id => {
                                 const friend = MOCK_FRIENDS.find(f => f.id === id)
                                 return (
-                                    <span key={id} className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                    <span key={id} className="bg-[#fff0f1] text-[#FF4655] text-xs px-2.5 py-1 rounded-full flex items-center gap-1 border border-[#fecdd3]">
                                         @{friend?.username}
-                                        <button type="button" onClick={() => toggleTag(id)}>✕</button>
+                                        <button type="button" onClick={() => toggleTag(id)} className="hover:opacity-70">×</button>
                                     </span>
                                 )
                             })}
                         </div>
                     )}
                 </div>
-
-                {error && <p className="text-red-500 text-sm">{error}</p>}
-
-                <button type="submit" className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600">
-                    Publicar
-                </button>
+                {error && <p className="text-[#FF4655] text-sm">{error}</p>}
+                <button type="submit" className="btn btn-primary w-full">Publicar</button>
             </form>
         </div>
     )
