@@ -17,38 +17,22 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="bg-white rounded-xl shadow-sm border p-8 w-full max-w-sm flex flex-col gap-5">
+        <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f]">
+            <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm flex flex-col gap-5">
                 <div className="flex flex-col items-center gap-2">
-                    <img id="logo" src="/img/logo.png" alt="Social Valorant" className="h-12 w-12 object-contain" />
-                    <h1 className="text-xl font-bold text-[#FF4655]">SOCIAL VALORANT</h1>
+                    <img src="/img/logo.png" alt="Social Valorant" className="h-14 w-14 object-contain" />
+                    <h1 className="text-xl font-bold text-[#FF4655] tracking-tight">SOCIAL VALORANT</h1>
                     <p className="text-sm text-gray-400">Inicia sessió per continuar</p>
                 </div>
-                {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+                {error && <p className="text-[#FF4655] text-sm text-center">{error}</p>}
                 <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        required
-                        className="border rounded px-3 py-2 text-sm"
-                    />
-                    <input
-                        type="password"
-                        placeholder="Contrasenya"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        required
-                        className="border rounded px-3 py-2 text-sm"
-                    />
-                    <button type="submit" className="bg-blue-500 text-white rounded px-4 py-2 text-sm hover:bg-blue-600">
-                        Iniciar sessió
-                    </button>
+                    <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required className="input" />
+                    <input type="password" placeholder="Contrasenya" value={password} onChange={e => setPassword(e.target.value)} required className="input" />
+                    <button type="submit" className="btn btn-primary w-full mt-1">Iniciar sessió</button>
                 </form>
-                <p className="text-sm text-center text-gray-500">
+                <p className="text-sm text-center text-gray-400">
                     No tens compte?{" "}
-                    <Link href="/register" className="text-blue-500 hover:underline">Registra't</Link>
+                    <Link href="/register" className="text-[#FF4655] font-medium hover:underline">Registra't</Link>
                 </p>
             </div>
         </div>

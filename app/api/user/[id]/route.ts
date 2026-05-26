@@ -12,9 +12,10 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
         select: {
             id: true,
             username: true,
+            avatarUrl: true,
             rank: { select: { id: true, name: true } },
-            region: { select: { name: true } },
-            role: { select: { name: true } },
+            region: { select: { id: true, name: true } },
+            role: { select: { id: true, name: true } },
         }
     })
 
@@ -51,13 +52,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     // Només l'usuari pot modificar el seu propi perfil
     if (session.user.id !== id) return NextResponse.json({ error: "No autoritzat" }, { status: 403 })
 
-    const { username, avatarUrl } = await req.json()
+    const { username, avatarUrl, rankId, regionId, roleIds } = await req.json()
 
     const updated = await prisma.user.update({
         where: { id: Number(id) },
         data: {
             ...(username?.trim() && { username }),
-            ...(avatarUrl && { avatarUrl })
+            ...(avatarUrl && { avatarUrl }),
+            ...(rankId && { rankId }),
+            ...(regionId && { regionId }),
+            ...(roleIds && { role: { set: roleIds.map((rid: number) => ({ id: rid })) } })
         },
         select: { id: true, username: true, avatarUrl: true }
     })
