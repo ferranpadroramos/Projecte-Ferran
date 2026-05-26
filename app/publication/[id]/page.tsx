@@ -92,16 +92,16 @@ export default function PublicationPage() {
     if (!pub) return <p className="text-center mt-10 text-gray-400">Carregant...</p>
 
     return (
-        <div className="max-w-xl mx-auto mt-6 px-4 flex flex-col gap-4">
+        <div className="page">
 
             {/* Publicació */}
-            <div className="border rounded-xl p-4 flex flex-col gap-3 shadow-sm">
+            <div className="card flex flex-col gap-3">
                 <div className="flex items-center gap-3">
                     <Link href={`/user/${pub.author.id}`}>
-                        <img src={pub.author.avatarUrl ?? "/img/profile.png"} alt={pub.author.username} className="w-10 h-10 rounded-full object-cover border" />
+                        <img src={pub.author.avatarUrl ?? "/img/profile.png"} alt={pub.author.username} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
                     </Link>
                     <div className="flex-1">
-                        <Link href={`/user/${pub.author.id}`} className="font-semibold hover:underline">@{pub.author.username}</Link>
+                        <Link href={`/user/${pub.author.id}`} className="font-semibold text-sm hover:text-[#FF4655] transition-colors">@{pub.author.username}</Link>
                         <p className="text-xs text-gray-400">{new Date(pub.createdAt).toLocaleDateString()}</p>
                     </div>
                     <ContentMenu
@@ -119,7 +119,7 @@ export default function PublicationPage() {
                 {pub.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                         {pub.tags.map(t => (
-                            <Link key={t.id} href={`/user/${t.id}`} className="text-xs text-blue-500 hover:underline">@{t.username}</Link>
+                            <Link key={t.id} href={`/user/${t.id}`} className="text-xs text-[#FF4655] font-medium hover:underline">@{t.username}</Link>
                         ))}
                     </div>
                 )}
@@ -128,20 +128,20 @@ export default function PublicationPage() {
                     <img src={pub.imageUrl} alt="publicació" className="rounded-lg w-full object-cover max-h-72" />
                 )}
 
-                <div className="flex gap-4 text-sm text-gray-500">
-                    <button onClick={handleLike} className={`flex items-center gap-1 hover:text-red-500 ${pub.likedByMe ? "text-red-500" : ""}`}>
+                <div className="flex gap-4 text-sm text-gray-400 pt-1 border-t border-gray-50">
+                    <button onClick={handleLike} className={`flex items-center gap-1.5 transition-colors hover:text-[#FF4655] ${pub.likedByMe ? "text-[#FF4655]" : ""}`}>
                         {pub.likedByMe ? "❤️" : "🤍"} {pub.likeCount}
                     </button>
-                    <span>💬 {pub.comments.length}</span>
+                    <span className="flex items-center gap-1.5">💬 {pub.comments.length}</span>
                 </div>
             </div>
 
             {/* Camp per escriure comentari */}
-            <div className="flex flex-col gap-2">
+            <div className="card flex flex-col gap-2">
                 {replyingTo && (
                     <div className="flex items-center gap-2 text-xs text-gray-400">
                         <span>Responent a un comentari</span>
-                        <button onClick={() => setReplyingTo(null)} className="text-red-400 hover:text-red-500">✕</button>
+                        <button onClick={() => setReplyingTo(null)} className="text-[#FF4655] hover:opacity-70">✕</button>
                     </div>
                 )}
                 <div className="flex gap-2">
@@ -151,11 +151,9 @@ export default function PublicationPage() {
                         onChange={e => setCommentText(e.target.value)}
                         onKeyDown={e => e.key === "Enter" && handleComment()}
                         placeholder={replyingTo ? "Escriu una resposta..." : "Escriu un comentari..."}
-                        className="flex-1 border rounded px-3 py-2 text-sm"
+                        className="input"
                     />
-                    <button onClick={handleComment} className="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600">
-                        Enviar
-                    </button>
+                    <button onClick={handleComment} className="btn btn-primary px-4">Enviar</button>
                 </div>
             </div>
 
@@ -163,14 +161,13 @@ export default function PublicationPage() {
             <div className="flex flex-col gap-3">
                 {pub.comments.map(comment => (
                     <div key={comment.id} className="flex flex-col gap-2">
-                        {/* Comentari arrel */}
-                        <div className="border rounded-xl p-3 flex flex-col gap-2">
+                        <div className="card flex flex-col gap-2">
                             <div className="flex items-center gap-2">
                                 <Link href={`/user/${comment.author.id}`}>
-                                    <img src={comment.author.avatarUrl ?? "/img/profile.png"} alt={comment.author.username} className="w-8 h-8 rounded-full object-cover border" />
+                                    <img src={comment.author.avatarUrl ?? "/img/profile.png"} alt={comment.author.username} className="w-8 h-8 rounded-full object-cover border border-gray-200" />
                                 </Link>
                                 <div className="flex-1">
-                                    <Link href={`/user/${comment.author.id}`} className="text-sm font-semibold hover:underline">@{comment.author.username}</Link>
+                                    <Link href={`/user/${comment.author.id}`} className="text-sm font-semibold hover:text-[#FF4655] transition-colors">@{comment.author.username}</Link>
                                     <p className="text-xs text-gray-400">{new Date(comment.timestamp).toLocaleDateString()}</p>
                                 </div>
                                 <ContentMenu
@@ -183,22 +180,21 @@ export default function PublicationPage() {
                                 />
                             </div>
                             <p className="text-sm">{comment.text}</p>
-                            <button onClick={() => setReplyingTo(comment.id)} className="self-start text-xs text-gray-400 hover:text-blue-500">
+                            <button onClick={() => setReplyingTo(comment.id)} className="self-start text-xs text-gray-400 hover:text-[#FF4655] transition-colors">
                                 Respondre
                             </button>
                         </div>
 
-                        {/* Respostes al comentari */}
                         {comment.replies.length > 0 && (
                             <div className="ml-6 flex flex-col gap-2">
                                 {comment.replies.map(reply => (
-                                    <div key={reply.id} className="border rounded-xl p-3 flex flex-col gap-2 bg-gray-50">
+                                    <div key={reply.id} className="card flex flex-col gap-2 bg-gray-50">
                                         <div className="flex items-center gap-2">
                                             <Link href={`/user/${reply.author.id}`}>
-                                                <img src={reply.author.avatarUrl ?? "/img/profile.png"} alt={reply.author.username} className="w-7 h-7 rounded-full object-cover border" />
+                                                <img src={reply.author.avatarUrl ?? "/img/profile.png"} alt={reply.author.username} className="w-7 h-7 rounded-full object-cover border border-gray-200" />
                                             </Link>
                                             <div className="flex-1">
-                                                <Link href={`/user/${reply.author.id}`} className="text-sm font-semibold hover:underline">@{reply.author.username}</Link>
+                                                <Link href={`/user/${reply.author.id}`} className="text-sm font-semibold hover:text-[#FF4655] transition-colors">@{reply.author.username}</Link>
                                                 <p className="text-xs text-gray-400">{new Date(reply.timestamp).toLocaleDateString()}</p>
                                             </div>
                                             <ContentMenu
