@@ -136,7 +136,8 @@ model Role {
 model Rank {
   id            Int      @id @default(autoincrement())
   name          String   @unique
-  desc          String 
+  desc          String
+  imageUrl      String?
   user          User[]
 }
 

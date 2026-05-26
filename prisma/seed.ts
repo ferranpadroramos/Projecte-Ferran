@@ -7,13 +7,44 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
+    const BASE = "https://res.cloudinary.com/dkmt2slre/image/upload/projecte-ferran/ranks"
+    const rankData = [
+        { name: "Unranked",      desc: "Sense rang",         img: "unranked" },
+        { name: "Iron I",        desc: "Iron I",             img: "ironI" },
+        { name: "Iron II",       desc: "Iron II",            img: "ironII" },
+        { name: "Iron III",      desc: "Iron III",           img: "ironIII" },
+        { name: "Bronze I",      desc: "Bronze I",           img: "bronzeI" },
+        { name: "Bronze II",     desc: "Bronze II",          img: "bronzeII" },
+        { name: "Bronze III",    desc: "Bronze III",         img: "bronzeIII" },
+        { name: "Silver I",      desc: "Silver I",           img: "silverI" },
+        { name: "Silver II",     desc: "Silver II",          img: "silverII" },
+        { name: "Silver III",    desc: "Silver III",         img: "silverIII" },
+        { name: "Gold I",        desc: "Gold I",             img: "goldI" },
+        { name: "Gold II",       desc: "Gold II",            img: "goldII" },
+        { name: "Gold III",      desc: "Gold III",           img: "goldIII" },
+        { name: "Platinum I",    desc: "Platinum I",         img: "platinumI" },
+        { name: "Platinum II",   desc: "Platinum II",        img: "platinumII" },
+        { name: "Platinum III",  desc: "Platinum III",       img: "platinumIII" },
+        { name: "Diamond I",     desc: "Diamond I",          img: "diamondI" },
+        { name: "Diamond II",    desc: "Diamond II",         img: "diamondII" },
+        { name: "Diamond III",   desc: "Diamond III",        img: "diamondIII" },
+        { name: "Ascendant I",   desc: "Ascendant I",        img: "ascendantI" },
+        { name: "Ascendant II",  desc: "Ascendant II",       img: "ascendantII" },
+        { name: "Ascendant III", desc: "Ascendant III",      img: "ascendantIII" },
+        { name: "Immortal I",    desc: "Immortal I",         img: "immortalI" },
+        { name: "Immortal II",   desc: "Immortal II",        img: "immortalII" },
+        { name: "Immortal III",  desc: "Immortal III",       img: "immortalIII" },
+        { name: "Radiant",       desc: "Rang màxim",         img: "radiant" },
+    ]
+
     // Rangs
-    const ranks = await Promise.all([
-        prisma.rank.upsert({ where: { name: "Bronze" }, update: {}, create: { name: "Bronze", desc: "Rang inicial" } }),
-        prisma.rank.upsert({ where: { name: "Plata" }, update: {}, create: { name: "Plata", desc: "Rang intermedi" } }),
-        prisma.rank.upsert({ where: { name: "Or" }, update: {}, create: { name: "Or", desc: "Rang avançat" } }),
-        prisma.rank.upsert({ where: { name: "Diamant" }, update: {}, create: { name: "Diamant", desc: "Rang expert" } }),
-    ])
+    const ranks = await Promise.all(
+        rankData.map(r => prisma.rank.upsert({
+            where: { name: r.name },
+            update: { imageUrl: `${BASE}/${r.img}` },
+            create: { name: r.name, desc: r.desc, imageUrl: `${BASE}/${r.img}` }
+        }))
+    )
 
     // Regions
     const regions = await Promise.all([
@@ -51,7 +82,7 @@ async function main() {
             email: adminEmail,
             password: hashed,
             isAdmin: true,
-            rankId: ranks[3].id,   // Diamant
+            rankId: ranks[ranks.length - 1].id, // Radiant
             regionId: regions[0].id, // Europa
             role: { connect: [{ id: roles[0].id }] }
         }
