@@ -12,16 +12,14 @@ export async function POST(req: Request) {
 
     const userId = Number(session.user.id)
 
-    // Crear el like
+    // Crear el like i notificar l'autor si no és el mateix usuari
     await prisma.like.create({ data: { userId, publicationId } })
 
-    // Obtenir l'autor de la publicació per enviar-li la notificació
     const publication = await prisma.publication.findUnique({
         where: { id: publicationId },
         select: { authorId: true }
     })
 
-    // Notificar l'autor si no és el mateix usuari
     if (publication && publication.authorId !== userId) {
         const notiType = await prisma.notificationType.findUnique({ where: { name: "like" } })
         if (notiType) {
@@ -49,10 +47,8 @@ export async function DELETE(req: Request) {
 
     const userId = Number(session.user.id)
 
-    // Eliminar el like
+    // Eliminar el like i la notificació associada
     await prisma.like.deleteMany({ where: { userId, publicationId } })
-
-    // Eliminar la notificació associada si existeix
     await prisma.notification.deleteMany({
         where: { senderId: userId, publicationId, notiType: { name: "like" } }
     })

@@ -138,8 +138,11 @@ export default function UserPage() {
                             {/* Menú d'opcions a les publicacions del perfil */}
                             <ContentMenu
                                 isOwner={isOwnProfile}
+                                authorId={user.id}
                                 publicationId={pub.id}
+                                currentText={pub.text}
                                 onDelete={() => setUser(prev => prev ? { ...prev, publications: prev.publications.filter(p => p.id !== pub.id) } : prev)}
+                                onEdit={newText => setUser(prev => prev ? { ...prev, publications: prev.publications.map(p => p.id === pub.id ? { ...p, text: newText } : p) } : prev)}
                             />
                         </div>
                         {pub.imageUrl && (

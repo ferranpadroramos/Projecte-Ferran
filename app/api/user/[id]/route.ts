@@ -3,11 +3,10 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    // Obtenir l'id de la ruta i la sessió activa
     const { id } = await params
     const session = await auth()
+    const sessionId = Number(session?.user?.id)
 
-    // Buscar l'usuari amb les seves relacions
     const user = await prisma.user.findUnique({
         where: { id: Number(id) },
         select: {
@@ -21,42 +20,47 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 
     if (!user) return NextResponse.json({ error: "Usuari no trobat" }, { status: 404 })
 
-    const sessionId = Number(session?.user?.id)
-
-    // Comprovar si ja són amics
     const friendship = await prisma.friendship.findFirst({
-        where: {
-            OR: [
-                { user1Id: sessionId, user2Id: Number(id) },
-                { user1Id: Number(id), user2Id: sessionId }
-            ]
-        }
+        where: { OR: [{ user1Id: sessionId, user2Id: Number(id) }, { user1Id: Number(id), user2Id: sessionId }] }
     })
 
-    // Comprovar si hi ha una sol·licitud d'amistat pendent
     const friendRequest = await prisma.friendRequest.findFirst({
-        where: {
-            senderId: sessionId,
-            receiverId: Number(id)
-        }
+        where: { senderId: sessionId, receiverId: Number(id) }
     })
 
-    // Obtenir les publicacions de l'usuari
     const publications = await prisma.publication.findMany({
         where: { authorId: Number(id) },
-        select: {
-            id: true,
-            text: true,
-            imageUrl: true,
-            likes: { select: { id: true } }
-        },
+        select: { id: true, text: true, imageUrl: true, likes: { select: { id: true } } },
         orderBy: { id: 'desc' }
     })
 
-    // Retornar l'usuari amb l'estat d'amistat i les publicacions
     return NextResponse.json({
         ...user,
         friendStatus: friendship ? 'friends' : friendRequest ? 'pending' : 'none',
         publications: publications.map(p => ({ ...p, likes: p.likes.length }))
     })
+}
+
+// PATCH /api/user/[id] — Actualitzar username i/o avatar de l'usuari
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const session = await auth()
+    if (!session?.user?.id) return NextResponse.json({ error: "No autenticat" }, { status: 401 })
+
+    const { id } = await params
+
+    // Només l'usuari pot modificar el seu propi perfil
+    if (session.user.id !== id) return NextResponse.json({ error: "No autoritzat" }, { status: 403 })
+
+    const { username, avatarUrl } = await req.json()
+
+    const updated = await prisma.user.update({
+        where: { id: Number(id) },
+        data: {
+            ...(username?.trim() && { username }),
+            ...(avatarUrl && { avatarUrl })
+        },
+        select: { id: true, username: true, avatarUrl: true }
+    })
+
+    return NextResponse.json(updated)
 }

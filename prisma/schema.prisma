@@ -115,6 +115,10 @@ model Report {
   authorId      Int
   publicationId Int?
   commentId     Int?
+  reasons       String[]     // Motius seleccionats al formulari
+  status        String       @default("pending") // pending | accepted | rejected
+  adminComment  String?      // Comentari opcional de l'admin en respondre
+  resolvedAt    DateTime?    // Quan s'ha resolt
   createdAt     DateTime     @default(now())
 
   author        User         @relation(fields: [authorId], references: [id])

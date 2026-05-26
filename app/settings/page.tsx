@@ -10,7 +10,7 @@ export default function SettingsPage() {
     const [success, setSuccess] = useState("")
     const [error, setError] = useState("")
 
-    // Quan l'usuari selecciona una nova foto de perfil
+    // Quan l'usuari selecciona una nova foto, generar previsualització local
     function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0]
         if (!file) return
@@ -25,7 +25,7 @@ export default function SettingsPage() {
 
         let avatarUrl: string | null = null
 
-        // Si hi ha nova foto, pujar-la a Cloudinary
+        // Si hi ha nova foto, pujar-la primer a Cloudinary i obtenir la URL
         if (avatarFile) {
             const formData = new FormData()
             formData.append("file", avatarFile)
@@ -38,7 +38,7 @@ export default function SettingsPage() {
             avatarUrl = uploadData.url
         }
 
-        // Enviar els canvis a la API (pendent d'implementar)
+        // TODO: implementar PATCH /api/user/[id]
         const res = await fetch(`/api/user/${session?.user?.id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },

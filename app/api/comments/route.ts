@@ -20,20 +20,18 @@ export async function POST(req: Request) {
         data: { text, authorId, publicationId, commentId }
     })
 
-    // Obtenir el tipus de notificació "comment" de la BD
+    // Notificar l'autor del contingut pare (publicació o comentari)
     const notiType = await prisma.notificationType.findUnique({ where: { name: "comment" } })
     if (notiType) {
         let receiverId: number | null = null
 
         if (commentId) {
-            // Si és una resposta, notificar a l'autor del comentari pare
             const parentComment = await prisma.comment.findUnique({
                 where: { id: commentId },
                 select: { authorId: true }
             })
             receiverId = parentComment?.authorId ?? null
         } else if (publicationId) {
-            // Si és un comentari a una publicació, notificar a l'autor de la publicació
             const publication = await prisma.publication.findUnique({
                 where: { id: publicationId },
                 select: { authorId: true }
@@ -41,7 +39,7 @@ export async function POST(req: Request) {
             receiverId = publication?.authorId ?? null
         }
 
-        // Crear la notificació només si el receptor no és el mateix que l'autor
+        // No notificar si l'autor es respon a si mateix
         if (receiverId && receiverId !== authorId) {
             await prisma.notification.create({
                 data: {

@@ -59,11 +59,14 @@ export default function HomePage() {
                             </Link>
                             <p className="text-xs text-gray-400">{new Date(pub.createdAt).toLocaleDateString()}</p>
                         </div>
-                        {/* Menú d'opcions (esborrar si és propi, reportar si no) */}
+                        {/* Menú d'opcions (esborrar/editar si és propi, veure perfil/reportar si no) */}
                         <ContentMenu
                             isOwner={session?.user?.id === String(pub.author.id)}
+                            authorId={pub.author.id}
                             publicationId={pub.id}
+                            currentText={pub.text}
                             onDelete={() => handleDelete(pub.id)}
+                            onEdit={newText => setPublications(prev => prev.map(p => p.id === pub.id ? { ...p, text: newText } : p))}
                         />
                     </div>
 
