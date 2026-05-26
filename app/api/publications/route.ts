@@ -43,11 +43,18 @@ export async function POST(req: Request) {
     const session = await auth()
     if (!session?.user?.id) return NextResponse.json({ error: "No autenticat" }, { status: 401 })
 
-    const { text } = await req.json()
+    const { text, imageUrl, taggedIds } = await req.json()
     if (!text?.trim()) return NextResponse.json({ error: "El text és obligatori" }, { status: 400 })
 
     const publication = await prisma.publication.create({
-        data: { text, authorId: Number(session.user.id) }
+        data: {
+            text,
+            imageUrl: imageUrl ?? null,
+            authorId: Number(session.user.id),
+            ...(taggedIds?.length > 0 && {
+                tags: { create: taggedIds.map((id: number) => ({ taggedId: id })) }
+            })
+        }
     })
 
     return NextResponse.json(publication, { status: 201 })

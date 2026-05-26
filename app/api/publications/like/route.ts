@@ -49,9 +49,9 @@ export async function DELETE(req: Request) {
 
     // Eliminar el like i la notificació associada
     await prisma.like.deleteMany({ where: { userId, publicationId } })
-    await prisma.notification.deleteMany({
-        where: { senderId: userId, publicationId, notiType: { name: "like" } }
-    })
+    const notiType = await prisma.notificationType.findUnique({ where: { name: "like" } })
+    if (notiType)
+        await prisma.notification.deleteMany({ where: { senderId: userId, publicationId, typeId: notiType.id } })
 
     return NextResponse.json({ ok: true }, { status: 200 })
 }
