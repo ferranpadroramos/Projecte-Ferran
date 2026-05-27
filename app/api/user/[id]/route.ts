@@ -22,7 +22,8 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
     if (!user) return NextResponse.json({ error: "Usuari no trobat" }, { status: 404 })
 
     const friendship = await prisma.friendship.findFirst({
-        where: { OR: [{ user1Id: sessionId, user2Id: Number(id) }, { user1Id: Number(id), user2Id: sessionId }] }
+        where: { OR: [{ user1Id: sessionId, user2Id: Number(id) }, { user1Id: Number(id), user2Id: sessionId }] },
+        select: { conversation: { select: { id: true } } }
     })
 
     const friendRequest = await prisma.friendRequest.findFirst({
@@ -38,6 +39,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
     return NextResponse.json({
         ...user,
         friendStatus: friendship ? 'friends' : friendRequest ? 'pending' : 'none',
+        conversationId: friendship?.conversation?.id ?? null,
         publications: publications.map(p => ({ ...p, likes: p.likes.length }))
     })
 }

@@ -13,6 +13,7 @@ type User = {
     role: { name: string }[]
     friendStatus: 'none' | 'pending' | 'friends'
     avatarUrl: string | null
+    conversationId: number | null
     publications: { id: number, text: string, imageUrl: string | null, likes: number }[]
 }
 
@@ -76,7 +77,12 @@ export default function UserPage() {
                 <div className="flex flex-col gap-1">
                     <h1 className="text-xl font-bold">@{user.username}</h1>
                     <p className="text-sm text-gray-500">{user.region?.name ?? "Sense regió"}</p>
-                    {user.rank && <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full w-fit">{user.rank.name}</span>}
+                    {user.rank && (
+                        <div className="flex items-center gap-1">
+                            <img src={`/img/ranks/${user.rank.id}.png`} alt={user.rank.name} className="w-5 h-5 object-contain" />
+                            <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full w-fit">{user.rank.name}</span>
+                        </div>
+                    )}
                     <div className="flex gap-1 flex-wrap">
                         {user.role.map(r => (
                             <span key={r.name} className="text-xs bg-[#fff0f1] text-[#FF4655] px-2 py-0.5 rounded-full">{r.name}</span>
@@ -102,7 +108,7 @@ export default function UserPage() {
                     {friendStatus === 'friends' && (
                         <>
                             <span className="btn btn-secondary pointer-events-none">✓ Amics</span>
-                            <a href={`/chat/${user.id}`} className="btn btn-primary">💬 Xat</a>
+                            <a href={`/chat/${user.conversationId}`} className="btn btn-primary">💬 Xat</a>
                             <button onClick={handleFriendAction} className="btn btn-danger">Eliminar amic</button>
                         </>
                     )}

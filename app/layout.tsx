@@ -17,7 +17,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <html lang="ca">
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 <Providers>
-                    {children}
+                    <Header />
+                    <main className="flex-1">
+                        {children}
+                    </main>
                 </Providers>
             </body>
         </html>

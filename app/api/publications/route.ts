@@ -9,6 +9,7 @@ export async function GET() {
 
         // Obtenir totes les publicacions amb autor, likes, comentaris i etiquetes
         const publications = await prisma.publication.findMany({
+            where: { authorId: { not: userId } },
             orderBy: { createdAt: 'desc' },
             select: {
                 id: true,

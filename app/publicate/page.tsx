@@ -1,30 +1,25 @@
 'use client'
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 
-// TODO: substituir per crida a API quan la BD estigui llesta
-const MOCK_FRIENDS = [
-    { id: 1, username: "anna99" },
-    { id: 2, username: "marc_dev" },
-    { id: 3, username: "laura_gx" },
-    { id: 4, username: "jordi22" },
-]
+type Friend = { id: number, username: string }
 
 export default function PublicatePage() {
     const [text, setText] = useState("")
     const [error, setError] = useState("")
-    // URL de previsualització de la imatge seleccionada
     const [imagePreview, setImagePreview] = useState<string | null>(null)
-    // Fitxer d'imatge seleccionat
     const [imageFile, setImageFile] = useState<File | null>(null)
-    // Llista d'ids d'amics etiquetats
     const [taggedIds, setTaggedIds] = useState<number[]>([])
-    // Text del cercador d'amics
     const [friendSearch, setFriendSearch] = useState("")
+    const [friends, setFriends] = useState<Friend[]>([])
     const router = useRouter()
 
-    // Filtrar amics pel text del cercador
-    const filteredFriends = MOCK_FRIENDS.filter(f =>
+    // Carregar amics reals de l'API
+    useEffect(() => {
+        fetch('/api/friends').then(res => res.json()).then(setFriends)
+    }, [])
+
+    const filteredFriends = friends.filter(f =>
         f.username.toLowerCase().includes(friendSearch.toLowerCase())
     )
 
@@ -124,7 +119,7 @@ export default function PublicatePage() {
                     {taggedIds.length > 0 && (
                         <div className="flex flex-wrap gap-2">
                             {taggedIds.map(id => {
-                                const friend = MOCK_FRIENDS.find(f => f.id === id)
+                                const friend = friends.find(f => f.id === id)
                                 return (
                                     <span key={id} className="bg-[#fff0f1] text-[#FF4655] text-xs px-2.5 py-1 rounded-full flex items-center gap-1 border border-[#fecdd3]">
                                         @{friend?.username}

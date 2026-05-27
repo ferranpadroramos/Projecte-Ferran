@@ -82,7 +82,7 @@ export default function HomePage() {
                             onClick={() => handleLike(pub.id, pub.likedByMe)}
                             className={`flex items-center gap-1.5 transition-colors hover:text-[#FF4655] ${pub.likedByMe ? "text-[#FF4655]" : ""}`}
                         >
-                            {pub.likedByMe ? "❤️" : "🤍"} {pub.likeCount}
+                            {pub.likedByMe ? "♥" : "♡"} {pub.likeCount}
                         </button>
                         <Link href={`/publication/${pub.id}`} className="flex items-center gap-1.5 hover:text-[#FF4655] transition-colors">
                             💬 {pub.commentCount}

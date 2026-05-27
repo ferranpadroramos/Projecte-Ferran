@@ -50,7 +50,9 @@ export async function POST(req: NextRequest) {
 
         const senderId = friendRequest.senderId
 
-        await prisma.friendship.create({ data: { user1Id: senderId, user2Id: receiverId } })
+        // Crear amistat i conversa associada
+        const friendship = await prisma.friendship.create({ data: { user1Id: senderId, user2Id: receiverId } })
+        await prisma.conversation.create({ data: { friendshipId: friendship.id } })
         await prisma.friendRequest.delete({ where: { id: solicitudId } })
 
     } catch (error) {
