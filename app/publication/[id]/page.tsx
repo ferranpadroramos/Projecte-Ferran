@@ -93,9 +93,9 @@ export default function PublicationPage() {
 
     return (
         <div className="page">
-
-            {/* Publicació */}
             <div className="card flex flex-col gap-3">
+
+                {/* Capcalera */}
                 <div className="flex items-center gap-3">
                     <Link href={`/user/${pub.author.id}`}>
                         <img src={pub.author.avatarUrl ?? "/img/profile.png"} alt={pub.author.username} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
@@ -114,8 +114,8 @@ export default function PublicationPage() {
                     />
                 </div>
 
+                {/* Text i imatge */}
                 <p className="text-sm">{pub.text}</p>
-
                 {pub.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                         {pub.tags.map(t => (
@@ -123,96 +123,92 @@ export default function PublicationPage() {
                         ))}
                     </div>
                 )}
+                {pub.imageUrl && <img src={pub.imageUrl} alt="publicació" className="rounded-lg w-full object-cover max-h-72" />}
 
-                {pub.imageUrl && (
-                    <img src={pub.imageUrl} alt="publicació" className="rounded-lg w-full object-cover max-h-72" />
-                )}
-
+                {/* Likes */}
                 <div className="flex gap-4 text-sm text-gray-400 pt-1 border-t border-gray-50">
                     <button onClick={handleLike} className={`flex items-center gap-1.5 transition-colors hover:text-[#FF4655] ${pub.likedByMe ? "text-[#FF4655]" : ""}`}>
-                        {pub.likedByMe ? "❤️" : "🤍"} {pub.likeCount}
+                        {pub.likedByMe ? "♥" : "♡"} {pub.likeCount}
                     </button>
                     <span className="flex items-center gap-1.5">💬 {pub.comments.length}</span>
                 </div>
-            </div>
 
-            {/* Camp per escriure comentari */}
-            <div className="card flex flex-col gap-2">
-                {replyingTo && (
-                    <div className="flex items-center gap-2 text-xs text-gray-400">
-                        <span>Responent a un comentari</span>
-                        <button onClick={() => setReplyingTo(null)} className="text-[#FF4655] hover:opacity-70">✕</button>
-                    </div>
-                )}
-                <div className="flex gap-2">
-                    <input
-                        type="text"
-                        value={commentText}
-                        onChange={e => setCommentText(e.target.value)}
-                        onKeyDown={e => e.key === "Enter" && handleComment()}
-                        placeholder={replyingTo ? "Escriu una resposta..." : "Escriu un comentari..."}
-                        className="input"
-                    />
-                    <button onClick={handleComment} className="btn btn-primary px-4">Enviar</button>
-                </div>
-            </div>
-
-            {/* Comentaris */}
-            <div className="flex flex-col gap-3">
-                {pub.comments.map(comment => (
-                    <div key={comment.id} className="flex flex-col gap-2">
-                        <div className="card flex flex-col gap-2">
-                            <div className="flex items-center gap-2">
-                                <Link href={`/user/${comment.author.id}`}>
-                                    <img src={comment.author.avatarUrl ?? "/img/profile.png"} alt={comment.author.username} className="w-8 h-8 rounded-full object-cover border border-gray-200" />
-                                </Link>
-                                <div className="flex-1">
-                                    <Link href={`/user/${comment.author.id}`} className="text-sm font-semibold hover:text-[#FF4655] transition-colors">@{comment.author.username}</Link>
-                                    <p className="text-xs text-gray-400">{new Date(comment.timestamp).toLocaleDateString()}</p>
-                                </div>
-                                <ContentMenu
-                                    isOwner={session?.user?.id === String(comment.author.id)}
-                                    authorId={comment.author.id}
-                                    commentId={comment.id}
-                                    currentText={comment.text}
-                                    onDelete={() => setPub(prev => prev ? { ...prev, comments: prev.comments.filter(c => c.id !== comment.id) } : prev)}
-                                    onEdit={newText => setPub(prev => prev ? { ...prev, comments: prev.comments.map(c => c.id === comment.id ? { ...c, text: newText } : c) } : prev)}
-                                />
-                            </div>
-                            <p className="text-sm">{comment.text}</p>
-                            <button onClick={() => setReplyingTo(comment.id)} className="self-start text-xs text-gray-400 hover:text-[#FF4655] transition-colors">
-                                Respondre
-                            </button>
-                        </div>
-
-                        {comment.replies.length > 0 && (
-                            <div className="ml-6 flex flex-col gap-2">
-                                {comment.replies.map(reply => (
-                                    <div key={reply.id} className="card flex flex-col gap-2 bg-gray-50">
-                                        <div className="flex items-center gap-2">
-                                            <Link href={`/user/${reply.author.id}`}>
-                                                <img src={reply.author.avatarUrl ?? "/img/profile.png"} alt={reply.author.username} className="w-7 h-7 rounded-full object-cover border border-gray-200" />
-                                            </Link>
-                                            <div className="flex-1">
-                                                <Link href={`/user/${reply.author.id}`} className="text-sm font-semibold hover:text-[#FF4655] transition-colors">@{reply.author.username}</Link>
-                                                <p className="text-xs text-gray-400">{new Date(reply.timestamp).toLocaleDateString()}</p>
-                                            </div>
-                                            <ContentMenu
-                                                isOwner={session?.user?.id === String(reply.author.id)}
-                                                authorId={reply.author.id}
-                                                commentId={reply.id}
-                                                currentText={reply.text}
-                                                onDelete={() => setPub(prev => prev ? { ...prev, comments: prev.comments.map(c => c.id === comment.id ? { ...c, replies: c.replies.filter(r => r.id !== reply.id) } : c) } : prev)}
-                                                onEdit={newText => setPub(prev => prev ? { ...prev, comments: prev.comments.map(c => c.id === comment.id ? { ...c, replies: c.replies.map(r => r.id === reply.id ? { ...r, text: newText } : r) } : c) } : prev)}
-                                            />
-                                        </div>
-                                        <p className="text-sm">{reply.text}</p>
+                {/* Comentaris */}
+                <div className="flex flex-col gap-3 border-t border-gray-50 pt-3">
+                    {pub.comments.map(comment => (
+                        <div key={comment.id} className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-2 bg-gray-50 rounded-xl p-3">
+                                <div className="flex items-center gap-2">
+                                    <Link href={`/user/${comment.author.id}`}>
+                                        <img src={comment.author.avatarUrl ?? "/img/profile.png"} alt={comment.author.username} className="w-8 h-8 rounded-full object-cover border border-gray-200" />
+                                    </Link>
+                                    <div className="flex-1">
+                                        <Link href={`/user/${comment.author.id}`} className="text-sm font-semibold hover:text-[#FF4655] transition-colors">@{comment.author.username}</Link>
+                                        <p className="text-xs text-gray-400">{new Date(comment.timestamp).toLocaleDateString()}</p>
                                     </div>
-                                ))}
+                                    <ContentMenu
+                                        isOwner={session?.user?.id === String(comment.author.id)}
+                                        authorId={comment.author.id}
+                                        commentId={comment.id}
+                                        currentText={comment.text}
+                                        onDelete={() => setPub(prev => prev ? { ...prev, comments: prev.comments.filter(c => c.id !== comment.id) } : prev)}
+                                        onEdit={newText => setPub(prev => prev ? { ...prev, comments: prev.comments.map(c => c.id === comment.id ? { ...c, text: newText } : c) } : prev)}
+                                    />
+                                </div>
+                                <p className="text-sm">{comment.text}</p>
+                                <button onClick={() => setReplyingTo(comment.id)} className="self-start text-xs text-gray-400 hover:text-[#FF4655] transition-colors">Respondre</button>
                             </div>
-                        )}
+                            {comment.replies.length > 0 && (
+                                <div className="ml-6 flex flex-col gap-2">
+                                    {comment.replies.map(reply => (
+                                        <div key={reply.id} className="flex flex-col gap-2 bg-gray-100 rounded-xl p-3">
+                                            <div className="flex items-center gap-2">
+                                                <Link href={`/user/${reply.author.id}`}>
+                                                    <img src={reply.author.avatarUrl ?? "/img/profile.png"} alt={reply.author.username} className="w-7 h-7 rounded-full object-cover border border-gray-200" />
+                                                </Link>
+                                                <div className="flex-1">
+                                                    <Link href={`/user/${reply.author.id}`} className="text-sm font-semibold hover:text-[#FF4655] transition-colors">@{reply.author.username}</Link>
+                                                    <p className="text-xs text-gray-400">{new Date(reply.timestamp).toLocaleDateString()}</p>
+                                                </div>
+                                                <ContentMenu
+                                                    isOwner={session?.user?.id === String(reply.author.id)}
+                                                    authorId={reply.author.id}
+                                                    commentId={reply.id}
+                                                    currentText={reply.text}
+                                                    onDelete={() => setPub(prev => prev ? { ...prev, comments: prev.comments.map(c => c.id === comment.id ? { ...c, replies: c.replies.filter(r => r.id !== reply.id) } : c) } : prev)}
+                                                    onEdit={newText => setPub(prev => prev ? { ...prev, comments: prev.comments.map(c => c.id === comment.id ? { ...c, replies: c.replies.map(r => r.id === reply.id ? { ...r, text: newText } : r) } : c) } : prev)}
+                                                />
+                                            </div>
+                                            <p className="text-sm">{reply.text}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+                {/* Camp per escriure comentari */}
+                <div className="flex flex-col gap-2 border-t border-gray-50 pt-3">
+                    {replyingTo && (
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <span>Responent a un comentari</span>
+                            <button onClick={() => setReplyingTo(null)} className="text-[#FF4655] hover:opacity-70">✕</button>
+                        </div>
+                    )}
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            value={commentText}
+                            onChange={e => setCommentText(e.target.value)}
+                            onKeyDown={e => e.key === "Enter" && handleComment()}
+                            placeholder={replyingTo ? "Escriu una resposta..." : "Escriu un comentari..."}
+                            className="input"
+                        />
+                        <button onClick={handleComment} className="btn btn-primary px-4">Enviar</button>
                     </div>
-                ))}
+                </div>
+
             </div>
         </div>
     )
