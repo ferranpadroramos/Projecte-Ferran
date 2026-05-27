@@ -17,7 +17,8 @@ export async function POST(req: Request) {
 
     // Crear el comentari
     const comment = await prisma.comment.create({
-        data: { text, authorId, publicationId, commentId }
+        data: { text, authorId, publicationId, commentId },
+        include: { author: { select: { id: true, username: true, avatarUrl: true } } }
     })
 
     // Notificar l'autor del contingut pare (publicació o comentari)
