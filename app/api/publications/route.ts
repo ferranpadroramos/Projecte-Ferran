@@ -53,7 +53,7 @@ export async function POST(req: Request) {
             imageUrl: imageUrl ?? null,
             authorId: Number(session.user.id),
             ...(taggedIds?.length > 0 && {
-                tags: { create: taggedIds.map((id: number) => ({ taggedId: id })) }
+                tags: { create: taggedIds.map((id: number) => ({ taggerId: Number(session.user.id), taggedId: id })) }
             })
         }
     })
