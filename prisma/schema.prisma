@@ -48,6 +48,7 @@ model FriendRequest {
   id          Int           @id @default(autoincrement())
   senderId    Int
   receiverId  Int
+  read        Boolean       @default(false)
   createdAt   DateTime      @default(now())
 
   sender      User          @relation("friendRequestSender", fields: [senderId], references: [id])
@@ -119,6 +120,7 @@ model Report {
   status        String       @default("pending") // pending | accepted | rejected
   adminComment  String?      // Comentari opcional de l'admin en respondre
   resolvedAt    DateTime?    // Quan s'ha resolt
+  read          Boolean      @default(false)
   createdAt     DateTime     @default(now())
 
   author        User         @relation(fields: [authorId], references: [id])
@@ -156,6 +158,7 @@ model Notification {
   receiverId    Int
   publicationId Int?
   commentId     Int?
+  read          Boolean          @default(false)
   timestamp     DateTime         @default(now())
 
   notiType      NotificationType @relation(fields: [typeId], references: [id])

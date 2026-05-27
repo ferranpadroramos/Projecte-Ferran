@@ -2,14 +2,31 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ConfirmModal from './ui/ConfirmModal'
 
 export default function Header() {
     const pathname = usePathname()
     const { data: session } = useSession()
     const [showLogout, setShowLogout] = useState(false)
+    const [showContactAdmin, setShowContactAdmin] = useState(false)
     const [search, setSearch] = useState('')
+    const [notiCount, setNotiCount] = useState(0)
+    const [requestCount, setRequestCount] = useState(0)
+    const [reportCount, setReportCount] = useState(0)
+
+    useEffect(() => {
+        if (!session) return
+        fetch('/api/notifications/count').then(res => res.json()).then(data => setNotiCount(data.count ?? 0))
+        fetch('/api/friendship/requests/count').then(res => res.json()).then(data => setRequestCount(data.count ?? 0))
+        fetch('/api/reports/count').then(res => res.json()).then(data => setReportCount(data.count ?? 0))
+    }, [session])
+
+    async function contactAdmin() {
+        const res = await fetch('/api/admin/contact', { method: 'POST' })
+        const data = await res.json()
+        if (data.conversationId) window.location.href = `/chat/${data.conversationId}`
+    }
 
     if (['/login', '/register'].includes(pathname)) return null
 
@@ -49,11 +66,45 @@ export default function Header() {
                 {/* Navegació central */}
                 <nav className="flex items-center gap-1 flex-1 justify-center">
                     {navLink('/home', 'Inici')}
-                    {navLink('/notifications', 'Notificacions')}
-                    {navLink('/requests', 'Sol·licituds')}
+                    <Link
+                        href="/notifications"
+                        onClick={() => setNotiCount(0)}
+                        className={`relative px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${pathname === '/notifications' ? 'bg-[#FF4655] text-white' : 'text-gray-600 hover:bg-[#fff0f1] hover:text-[#FF4655]'}`}
+                    >
+                        Notificacions
+                        {notiCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-[#FF4655] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
+                                {notiCount > 9 ? '9+' : notiCount}
+                            </span>
+                        )}
+                    </Link>
+                    <Link
+                        href="/requests"
+                        onClick={() => setRequestCount(0)}
+                        className={`relative px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${pathname === '/requests' ? 'bg-[#FF4655] text-white' : 'text-gray-600 hover:bg-[#fff0f1] hover:text-[#FF4655]'}`}
+                    >
+                        Sol·licituds
+                        {requestCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-[#FF4655] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
+                                {requestCount > 9 ? '9+' : requestCount}
+                            </span>
+                        )}
+                    </Link>
                     {navLink('/messages', 'Missatges')}
-                    {/* Reports només visible per admins */}
-                    {(session?.user as { isAdmin?: boolean })?.isAdmin && navLink('/reports', 'Reports')}
+                    {(session?.user as { isAdmin?: boolean })?.isAdmin && (
+                        <Link
+                            href="/reports"
+                            onClick={() => setReportCount(0)}
+                            className={`relative px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${pathname === '/reports' ? 'bg-[#FF4655] text-white' : 'text-gray-600 hover:bg-[#fff0f1] hover:text-[#FF4655]'}`}
+                        >
+                            Reports
+                            {reportCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-[#FF4655] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
+                                    {reportCount > 9 ? '9+' : reportCount}
+                                </span>
+                            )}
+                        </Link>
+                    )}
                 </nav>
 
                 {/* Accions dreta */}
@@ -71,6 +122,9 @@ export default function Header() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                     </Link>
+                    <button onClick={() => setShowContactAdmin(true)} title="Contactar amb l'admin" className="text-gray-400 hover:text-[#FF4655] transition-colors text-lg">
+                        ❓
+                    </button>
                     <button onClick={() => setShowLogout(true)} className="text-gray-400 hover:text-[#FF4655] transition-colors">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -84,6 +138,13 @@ export default function Header() {
                     message="Vols tancar la sessió?"
                     onConfirm={() => signOut({ callbackUrl: '/login' })}
                     onCancel={() => setShowLogout(false)}
+                />
+            )}
+            {showContactAdmin && (
+                <ConfirmModal
+                    message="Vols contactar amb l'administrador?"
+                    onConfirm={() => { setShowContactAdmin(false); contactAdmin() }}
+                    onCancel={() => setShowContactAdmin(false)}
                 />
             )}
         </>
