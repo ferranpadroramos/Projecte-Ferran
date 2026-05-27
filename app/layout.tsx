@@ -15,14 +15,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <html lang="ca">
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} style={{background: 'linear-gradient(to right, rgba(255,70,85,0.12) 0%, rgba(255,70,85,0.12) 25%, white 25%, white 75%, rgba(255,70,85,0.12) 75%, rgba(255,70,85,0.12) 100%)'}}>
                 <Providers>
                     <Header />
-                    <div style={{background: 'linear-gradient(to right, rgba(255,70,85,0.12) 0%, rgba(255,70,85,0.12) 25%, white 25%, white 75%, rgba(255,70,85,0.12) 75%, rgba(255,70,85,0.12) 100%)', minHeight: '100vh'}}>
-                        <main className="flex-1">
-                            {children}
-                        </main>
-                    </div>
+                    <main className="flex-1">
+                        {children}
+                    </main>
                 </Providers>
             </body>
         </html>
