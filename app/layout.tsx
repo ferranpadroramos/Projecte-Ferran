@@ -18,7 +18,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 <Providers>
                     <Header />
-                    <div className="min-h-screen" style={{background: 'linear-gradient(to right, #FF4655 0%, #FF4655 2%, white 2%, white 98%, #FF4655 98%, #FF4655 100%)'}}>
+                    <div style={{background: 'linear-gradient(to right, rgba(255,70,85,0.12) 0%, rgba(255,70,85,0.12) 25%, white 25%, white 75%, rgba(255,70,85,0.12) 75%, rgba(255,70,85,0.12) 100%)', minHeight: '100vh'}}>
                         <main className="flex-1">
                             {children}
                         </main>
