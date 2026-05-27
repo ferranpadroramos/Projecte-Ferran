@@ -79,6 +79,7 @@ model Message {
   senderId       Int
   conversationId Int
   text           String
+  read           Boolean      @default(false)
   createdAt      DateTime     @default(now())
 
   sender         User         @relation(fields: [senderId], references: [id])

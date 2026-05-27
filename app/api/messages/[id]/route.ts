@@ -31,6 +31,12 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
         }
     })
 
+    // Marcar missatges rebuts com a llegits
+    await prisma.message.updateMany({
+        where: { conversationId: Number(id), senderId: { not: Number(session.user.id) }, read: false },
+        data: { read: true }
+    })
+
     return NextResponse.json(messages)
 }
 

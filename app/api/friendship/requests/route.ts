@@ -24,6 +24,12 @@ export async function GET() {
             }
         })
 
+        // Marcar totes com a llegides
+        await prisma.friendRequest.updateMany({
+            where: { receiverId, read: false },
+            data: { read: true }
+        })
+
         return NextResponse.json(requests)
     } catch {
         return NextResponse.json({ error: "Error del servidor" }, { status: 500 })

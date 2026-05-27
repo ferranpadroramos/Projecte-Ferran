@@ -13,15 +13,17 @@ export async function GET() {
         select: {
             id: true,
             timestamp: true,
-            // Tipus de notificació
             notiType: { select: { name: true } },
-            // Qui ha enviat la notificació
             sender: { select: { id: true, username: true, avatarUrl: true } },
-            // Publicació relacionada (si n'hi ha)
             publication: { select: { id: true, text: true } },
-            // Comentari relacionat (si n'hi ha)
             comment: { select: { id: true, text: true, publicationId: true } }
         }
+    })
+
+    // Marcar totes com a llegides
+    await prisma.notification.updateMany({
+        where: { receiverId: Number(session.user.id), read: false },
+        data: { read: true }
     })
 
     return NextResponse.json(notifications)

@@ -108,7 +108,9 @@ export default function UserPage() {
                     {friendStatus === 'friends' && (
                         <>
                             <span className="btn btn-secondary pointer-events-none">✓ Amics</span>
-                            <a href={`/chat/${user.conversationId}`} className="btn btn-primary">💬 Xat</a>
+                            {friendStatus === 'friends' && user.conversationId && (
+                                <a href={`/chat/${user.conversationId}`} className="btn btn-primary">💬 Xat</a>
+                            )}
                             <button onClick={handleFriendAction} className="btn btn-danger">Eliminar amic</button>
                         </>
                     )}

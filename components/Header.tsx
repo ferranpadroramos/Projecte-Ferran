@@ -14,12 +14,14 @@ export default function Header() {
     const [notiCount, setNotiCount] = useState(0)
     const [requestCount, setRequestCount] = useState(0)
     const [reportCount, setReportCount] = useState(0)
+    const [messageCount, setMessageCount] = useState(0)
 
     useEffect(() => {
         if (!session) return
         fetch('/api/notifications/count').then(res => res.json()).then(data => setNotiCount(data.count ?? 0))
         fetch('/api/friendship/requests/count').then(res => res.json()).then(data => setRequestCount(data.count ?? 0))
         fetch('/api/reports/count').then(res => res.json()).then(data => setReportCount(data.count ?? 0))
+        fetch('/api/messages/count').then(res => res.json()).then(data => setMessageCount(data.count ?? 0))
     }, [session])
 
     async function contactAdmin() {
@@ -90,7 +92,18 @@ export default function Header() {
                             </span>
                         )}
                     </Link>
-                    {navLink('/messages', 'Missatges')}
+                    <Link
+                        href="/messages"
+                        onClick={() => setMessageCount(0)}
+                        className={`relative px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${pathname === '/messages' ? 'bg-[#FF4655] text-white' : 'text-gray-600 hover:bg-[#fff0f1] hover:text-[#FF4655]'}`}
+                    >
+                        Missatges
+                        {messageCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-[#FF4655] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
+                                {messageCount > 9 ? '9+' : messageCount}
+                            </span>
+                        )}
+                    </Link>
                     {(session?.user as { isAdmin?: boolean })?.isAdmin && (
                         <Link
                             href="/reports"
