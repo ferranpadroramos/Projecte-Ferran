@@ -32,13 +32,16 @@ export default function PublicationPage() {
     const { data: session } = useSession()
     const [pub, setPub] = useState<Publication | null>(null)
     const [commentText, setCommentText] = useState("")
-    // id del comentari al qual s'està responent (null = comentari a la publicació)
     const [replyingTo, setReplyingTo] = useState<number | null>(null)
+    const [taggedIds, setTaggedIds] = useState<number[]>([])
+    const [friends, setFriends] = useState<{ id: number, username: string }[]>([])
+    const [friendSearch, setFriendSearch] = useState("")
 
     useEffect(() => {
         fetch(`/api/publication/${id}`)
             .then(res => res.json())
             .then(setPub)
+        fetch('/api/friends').then(res => res.json()).then(data => { if (Array.isArray(data)) setFriends(data) })
     }, [id])
 
     async function handleLike() {
@@ -63,11 +66,14 @@ export default function PublicationPage() {
             body: JSON.stringify({
                 text: commentText,
                 publicationId: replyingTo ? null : pub.id,
-                commentId: replyingTo ?? null
+                commentId: replyingTo ?? null,
+                taggedIds
             })
         })
         const newComment = await res.json()
         setCommentText("")
+        setTaggedIds([])
+        setFriendSearch("")
 
         if (replyingTo) {
             // Afegir la resposta al comentari pare
@@ -207,6 +213,42 @@ export default function PublicationPage() {
                         />
                         <button onClick={handleComment} className="btn btn-primary px-4">Enviar</button>
                     </div>
+                    {/* Etiquetar amics */}
+                    <input
+                        type="text"
+                        placeholder="Etiquetar un amic..."
+                        value={friendSearch}
+                        onChange={e => setFriendSearch(e.target.value)}
+                        className="input text-sm"
+                    />
+                    {friendSearch && (
+                        <ul className="card p-0 overflow-hidden divide-y divide-gray-50">
+                            {friends.filter(f => f.username.toLowerCase().includes(friendSearch.toLowerCase())).length === 0 && (
+                                <li className="px-3 py-2 text-sm text-gray-400">Cap resultat</li>
+                            )}
+                            {friends.filter(f => f.username.toLowerCase().includes(friendSearch.toLowerCase())).map(f => (
+                                <li key={f.id}
+                                    onClick={() => { setTaggedIds(prev => prev.includes(f.id) ? prev.filter(t => t !== f.id) : [...prev, f.id]); setFriendSearch("") }}
+                                    className={`px-3 py-2 cursor-pointer flex justify-between items-center text-sm transition-colors hover:bg-gray-50 ${taggedIds.includes(f.id) ? 'bg-[#fff0f1] text-[#FF4655]' : ''}`}>
+                                    <span>@{f.username}</span>
+                                    {taggedIds.includes(f.id) && <span className="font-bold">✓</span>}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                    {taggedIds.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                            {taggedIds.map(id => {
+                                const f = friends.find(fr => fr.id === id)
+                                return (
+                                    <span key={id} className="bg-[#fff0f1] text-[#FF4655] text-xs px-2.5 py-1 rounded-full flex items-center gap-1 border border-[#fecdd3]">
+                                        @{f?.username}
+                                        <button onClick={() => setTaggedIds(prev => prev.filter(t => t !== id))}>×</button>
+                                    </span>
+                                )
+                            })}
+                        </div>
+                    )}
                 </div>
 
             </div>

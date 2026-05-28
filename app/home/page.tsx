@@ -24,7 +24,7 @@ export default function HomePage() {
     useEffect(() => {
         fetch('/api/publications')
             .then(res => res.json())
-            .then(setPublications)
+            .then(data => { if (Array.isArray(data)) setPublications(data) })
     }, [])
 
     async function handleLike(id: number, likedByMe: boolean) {

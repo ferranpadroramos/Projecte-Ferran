@@ -7,17 +7,20 @@ export async function POST(req: Request) {
     const session = await auth()
     if (!session?.user?.id) return NextResponse.json({ error: "No autenticat" }, { status: 401 })
 
-    const { text, publicationId, commentId } = await req.json()
+    const { text, publicationId, commentId, taggedIds } = await req.json()
 
     if (!text?.trim()) return NextResponse.json({ error: "El text és obligatori" }, { status: 400 })
-    // Cal que tingui publicationId o commentId, però no cap dels dos
     if (!publicationId && !commentId) return NextResponse.json({ error: "Falta publicationId o commentId" }, { status: 400 })
 
     const authorId = Number(session.user.id)
 
-    // Crear el comentari
     const comment = await prisma.comment.create({
-        data: { text, authorId, publicationId, commentId },
+        data: {
+            text, authorId, publicationId, commentId,
+            ...(taggedIds?.length > 0 && {
+                tags: { create: taggedIds.map((id: number) => ({ taggerId: authorId, taggedId: id })) }
+            })
+        },
         include: { author: { select: { id: true, username: true, avatarUrl: true } } }
     })
 
@@ -50,6 +53,24 @@ export async function POST(req: Request) {
                     publicationId: publicationId ?? null,
                     commentId: comment.id
                 }
+            })
+        }
+    }
+
+    // Notificar als etiquetats
+    if (taggedIds?.length > 0) {
+        const tagNotiType = await prisma.notificationType.findUnique({ where: { name: "tag" } })
+        if (tagNotiType) {
+            await prisma.notification.createMany({
+                data: taggedIds
+                    .filter((id: number) => id !== authorId)
+                    .map((id: number) => ({
+                        typeId: tagNotiType.id,
+                        senderId: authorId,
+                        receiverId: id,
+                        publicationId: publicationId ?? null,
+                        commentId: comment.id
+                    }))
             })
         }
     }

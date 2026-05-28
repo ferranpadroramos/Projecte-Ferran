@@ -47,16 +47,35 @@ export async function POST(req: Request) {
     const { text, imageUrl, taggedIds } = await req.json()
     if (!text?.trim()) return NextResponse.json({ error: "El text és obligatori" }, { status: 400 })
 
+    const authorId = Number(session.user.id)
+
     const publication = await prisma.publication.create({
         data: {
             text,
             imageUrl: imageUrl ?? null,
-            authorId: Number(session.user.id),
+            authorId,
             ...(taggedIds?.length > 0 && {
-                tags: { create: taggedIds.map((id: number) => ({ taggerId: Number(session.user.id), taggedId: id })) }
+                tags: { create: taggedIds.map((id: number) => ({ taggerId: authorId, taggedId: id })) }
             })
         }
     })
+
+    // Notificar als etiquetats
+    if (taggedIds?.length > 0) {
+        const notiType = await prisma.notificationType.findUnique({ where: { name: "tag" } })
+        if (notiType) {
+            await prisma.notification.createMany({
+                data: taggedIds
+                    .filter((id: number) => id !== authorId)
+                    .map((id: number) => ({
+                        typeId: notiType.id,
+                        senderId: authorId,
+                        receiverId: id,
+                        publicationId: publication.id
+                    }))
+            })
+        }
+    }
 
     return NextResponse.json(publication, { status: 201 })
 }

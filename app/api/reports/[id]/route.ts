@@ -42,12 +42,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     })
 
     const contentAuthorId = report.publication?.authorId ?? report.comment?.authorId
-
-    if (deleteContent && status === "accepted") {
-        if (report.publicationId) await prisma.publication.delete({ where: { id: report.publicationId } })
-        else if (report.commentId) await prisma.comment.delete({ where: { id: report.commentId } })
-    }
-
     const notiType = await prisma.notificationType.findUnique({ where: { name: "report" } })
 
     if (notiType) {
@@ -67,19 +61,29 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             }
         })
 
-        // Notificar al creador del contingut si l'admin ho indica
-        if (notifyCreator && notifyText?.trim() && contentAuthorId) {
+        // Notificar sempre al reportat si s'accepta
+        if (status === "accepted" && contentAuthorId && contentAuthorId !== report.authorId) {
+            const reportedMessage = deleteContent
+                ? `El teu contingut ha estat eliminat per incomplir les normes${notifyText?.trim() ? `: "${notifyText.trim()}"` : "."}`
+                : `El teu contingut ha estat revisat per l'administrador${notifyText?.trim() ? `: "${notifyText.trim()}"` : "."}`
+
             await prisma.notification.create({
                 data: {
                     typeId: notiType.id,
                     senderId: userId,
                     receiverId: contentAuthorId,
-                    publicationId: report.publicationId ?? null,
-                    commentId: report.commentId ?? null,
-                    message: notifyText.trim()
+                    // Si s'esborra el contingut no guardem la referència (ja no existirà)
+                    publicationId: deleteContent ? null : (report.publicationId ?? null),
+                    commentId: deleteContent ? null : (report.commentId ?? null),
+                    message: reportedMessage
                 }
             })
         }
+    }
+
+    if (deleteContent && status === "accepted") {
+        if (report.publicationId) await prisma.publication.delete({ where: { id: report.publicationId } })
+        else if (report.commentId) await prisma.comment.delete({ where: { id: report.commentId } })
     }
 
     return NextResponse.json({ ok: true })
