@@ -48,9 +48,27 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         else if (report.commentId) await prisma.comment.delete({ where: { id: report.commentId } })
     }
 
-    if (notifyCreator && notifyText?.trim() && contentAuthorId) {
-        const notiType = await prisma.notificationType.findUnique({ where: { name: "report" } })
-        if (notiType) {
+    const notiType = await prisma.notificationType.findUnique({ where: { name: "report" } })
+
+    if (notiType) {
+        // Notificar a l'autor del report (qui va reportar)
+        const reporterMessage = status === "accepted"
+            ? `El teu report ha estat acceptat${adminComment ? `: "${adminComment}"` : "."}`
+            : `El teu report ha estat rebutjat${adminComment ? `: "${adminComment}"` : "."}`
+
+        await prisma.notification.create({
+            data: {
+                typeId: notiType.id,
+                senderId: userId,
+                receiverId: report.authorId,
+                publicationId: report.publicationId ?? null,
+                commentId: report.commentId ?? null,
+                message: reporterMessage
+            }
+        })
+
+        // Notificar al creador del contingut si l'admin ho indica
+        if (notifyCreator && notifyText?.trim() && contentAuthorId) {
             await prisma.notification.create({
                 data: {
                     typeId: notiType.id,
