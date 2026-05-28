@@ -16,7 +16,8 @@ export async function GET() {
             notiType: { select: { name: true } },
             sender: { select: { id: true, username: true, avatarUrl: true } },
             publication: { select: { id: true, text: true } },
-            comment: { select: { id: true, text: true, publicationId: true } }
+            comment: { select: { id: true, text: true, publicationId: true } },
+            message: true
         }
     })
 

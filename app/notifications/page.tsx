@@ -5,6 +5,7 @@ import Link from "next/link"
 type Notification = {
     id: number
     timestamp: string
+    message: string | null
     notiType: { name: string }
     sender: { id: number, username: string, avatarUrl: string | null }
     publication: { id: number, text: string } | null
@@ -29,7 +30,7 @@ function getNotiText(type: string, publication: Notification["publication"], com
                 ? `t'ha etiquetat en una publicació 🏷️`
                 : `t'ha etiquetat en un comentari 🏷️`
         case "report":
-            return `ha reportat una publicació ⚠️`
+            return `el teu contingut ha estat revisat per l'administrador ⚠️`
         default:
             return `t'ha enviat una notificació`
     }
@@ -80,10 +81,16 @@ export default function NotificationsPage() {
                             <img src={noti.sender.avatarUrl ?? "/img/profile.png"} alt={noti.sender.username} className="w-10 h-10 rounded-full object-cover border border-gray-200 flex-shrink-0" />
                             <div className="flex flex-col flex-1 min-w-0">
                                 <p className="text-sm">
-                                    <span className="font-semibold">@{noti.sender.username}</span>
+                                    {noti.notiType.name === "report"
+                                        ? <span className="font-semibold">Administrador</span>
+                                        : <span className="font-semibold">@{noti.sender.username}</span>
+                                    }
                                     {" "}{getNotiText(noti.notiType.name, noti.publication, noti.comment)}
                                 </p>
-                                {noti.publication && (
+                                {noti.notiType.name === "report" && noti.message && (
+                                    <p className="text-xs text-gray-500 mt-0.5 italic">"{noti.message}"</p>
+                                )}
+                                {noti.notiType.name !== "report" && noti.publication && (
                                     <p className="text-xs text-gray-400 truncate mt-0.5">"{noti.publication.text}"</p>
                                 )}
                                 <span className="text-xs text-gray-400 mt-0.5">{formatDate(noti.timestamp)}</span>
