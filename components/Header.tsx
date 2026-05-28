@@ -104,20 +104,18 @@ export default function Header() {
                             </span>
                         )}
                     </Link>
-                    {(session?.user as { isAdmin?: boolean })?.isAdmin && (
-                        <Link
-                            href="/reports"
-                            onClick={() => setReportCount(0)}
-                            className={`relative px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${pathname === '/reports' ? 'bg-[#FF4655] text-white' : 'text-gray-600 hover:bg-[#fff0f1] hover:text-[#FF4655]'}`}
-                        >
-                            Reports
-                            {reportCount > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-[#FF4655] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
-                                    {reportCount > 9 ? '9+' : reportCount}
-                                </span>
-                            )}
-                        </Link>
-                    )}
+                    <Link
+                        href="/reports"
+                        onClick={() => setReportCount(0)}
+                        className={`relative px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${pathname === '/reports' ? 'bg-[#FF4655] text-white' : 'text-gray-600 hover:bg-[#fff0f1] hover:text-[#FF4655]'}`}
+                    >
+                        {(session?.user as { isAdmin?: boolean })?.isAdmin ? 'Reports' : 'Els meus reports'}
+                        {reportCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-[#FF4655] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
+                                {reportCount > 9 ? '9+' : reportCount}
+                            </span>
+                        )}
+                    </Link>
                 </nav>
 
                 {/* Accions dreta */}

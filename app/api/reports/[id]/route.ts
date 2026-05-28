@@ -57,7 +57,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
                     senderId: userId,
                     receiverId: contentAuthorId,
                     publicationId: report.publicationId ?? null,
-                    commentId: report.commentId ?? null
+                    commentId: report.commentId ?? null,
+                    message: notifyText.trim()
                 }
             })
         }

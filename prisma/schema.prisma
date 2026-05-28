@@ -159,6 +159,7 @@ model Notification {
   receiverId    Int
   publicationId Int?
   commentId     Int?
+  message       String?
   read          Boolean          @default(false)
   timestamp     DateTime         @default(now())
 
