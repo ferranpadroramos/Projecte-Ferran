@@ -10,6 +10,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 export const metadata: Metadata = {
     title: "Social Valorant",
     description: "La xarxa social de la comunitat Valorant",
+    icons: { icon: "/img/logo.png" },
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
