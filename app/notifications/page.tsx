@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import Pusher from "pusher-js"
+import { useSession } from "next-auth/react"
 
 type Notification = {
     id: number
@@ -56,6 +58,7 @@ function formatDate(timestamp: string) {
 }
 
 export default function NotificationsPage() {
+    const { data: session } = useSession()
     const [notifications, setNotifications] = useState<Notification[]>([])
     const [loading, setLoading] = useState(true)
 
@@ -63,7 +66,18 @@ export default function NotificationsPage() {
         fetch("/api/notifications")
             .then(res => res.json())
             .then(data => { setNotifications(data); setLoading(false) })
-    }, [])
+
+        if (!session?.user?.id) return
+        const pusherClient = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, { cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER! })
+        const channel = pusherClient.subscribe(`notifications-${session.user.id}`)
+        channel.bind("new-notification", () => {
+            // Recarregar notificacions quan n'arriba una de nova
+            fetch("/api/notifications")
+                .then(res => res.json())
+                .then(setNotifications)
+        })
+        return () => pusherClient.unsubscribe(`notifications-${session.user.id}`)
+    }, [session?.user?.id])
 
     if (loading) return <p className="text-center mt-10 text-gray-400">Carregant...</p>
 

@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
+import { pusher } from "@/lib/pusher"
 import { NextResponse } from "next/server"
 
 // POST /api/publications/like — Donar like a una publicació
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
     if (publication && publication.authorId !== userId) {
         const notiType = await prisma.notificationType.findUnique({ where: { name: "like" } })
         if (notiType) {
-            await prisma.notification.create({
+            const notification = await prisma.notification.create({
                 data: {
                     typeId: notiType.id,
                     senderId: userId,
@@ -31,6 +32,7 @@ export async function POST(req: Request) {
                     publicationId
                 }
             })
+            await pusher.trigger(`notifications-${publication.authorId}`, "new-notification", notification)
         }
     }
 

@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
+import { pusher } from "@/lib/pusher"
 import { NextResponse } from "next/server"
 
 // Comprova que l'usuari pertany a la conversa i la retorna
@@ -58,6 +59,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             sender: { select: { id: true, username: true, avatarUrl: true } }
         }
     })
+
+    await pusher.trigger(`chat-${id}`, "new-message", message)
 
     return NextResponse.json(message, { status: 201 })
 }

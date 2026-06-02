@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import { useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
+import Pusher from "pusher-js"
 
 type Message = {
     id: number
@@ -22,6 +23,18 @@ export default function ChatPage() {
         fetch(`/api/messages/${id}`)
             .then(res => res.json())
             .then(setMessages)
+
+        // Subscriure's al canal del xat per rebre missatges en temps real
+        const pusherClient = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, { cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER! })
+        const channel = pusherClient.subscribe(`chat-${id}`)
+        channel.bind("new-message", (msg: Message) => {
+            setMessages(prev => {
+                // Evitar duplicats (el missatge propi ja s'afegeix optimísticament)
+                if (prev.some(m => m.id === msg.id)) return prev
+                return [...prev, msg]
+            })
+        })
+        return () => pusherClient.unsubscribe(`chat-${id}`)
     }, [id])
 
     // Fer scroll automàtic al final quan arriben nous missatges
