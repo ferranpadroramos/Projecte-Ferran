@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import ConfirmModal from './ui/ConfirmModal'
+import Pusher from 'pusher-js'
 
 export default function Header() {
     const pathname = usePathname()
@@ -17,12 +18,19 @@ export default function Header() {
     const [messageCount, setMessageCount] = useState(0)
 
     useEffect(() => {
-        if (!session) return
+        if (!session?.user?.id) return
         fetch('/api/notifications/count').then(res => res.json()).then(data => setNotiCount(data.count ?? 0))
         fetch('/api/friendship/requests/count').then(res => res.json()).then(data => setRequestCount(data.count ?? 0))
         fetch('/api/reports/count').then(res => res.json()).then(data => setReportCount(data.count ?? 0))
         fetch('/api/messages/count').then(res => res.json()).then(data => setMessageCount(data.count ?? 0))
-    }, [session])
+
+        const pusherClient = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, { cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER! })
+        const channel = pusherClient.subscribe(`notifications-${session.user.id}`)
+        channel.bind('new-notification', () => {
+            fetch('/api/notifications/count').then(res => res.json()).then(data => setNotiCount(data.count ?? 0))
+        })
+        return () => pusherClient.unsubscribe(`notifications-${session.user.id}`)
+    }, [session?.user?.id])
 
     async function contactAdmin() {
         const res = await fetch('/api/admin/contact', { method: 'POST' })

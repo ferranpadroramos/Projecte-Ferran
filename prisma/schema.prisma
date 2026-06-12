@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../app/generated/prisma"
@@ -13,63 +8,56 @@ datasource db {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  username      String   @unique
-  email         String   @unique
-  password      String
-  isAdmin       Boolean  @default(false)
-  regionId      Int
-  rankId        Int
-  avatarUrl     String?
-  
-  role          Role[]
-  likes         Like[]
-  reports       Report[]
-  friendRequestsSent      FriendRequest[] @relation("friendRequestSender")
-  friendRequestsReceived  FriendRequest[] @relation("friendRequestReceiver")
-  friendships1            Friendship[]    @relation("friendshipUser1")
-  friendships2            Friendship[]    @relation("friendshipUser2")
-  messages                Message[]
-  tagsMade      Tag[]  @relation("tagger")
-  tagsReceived  Tag[]  @relation("tagged")
-  publications  Publication[] @relation("publicationAuthor")
-  comments      Comment[]   @relation("commentAuthor")
-  sentNotifications   Notification[] @relation("sender")
-  receivedNotifications Notification[] @relation("receiver")
-  createdAt     DateTime @default(now())
-
-  rank          Rank         @relation(fields: [rankId], references: [id])
-  region        Region       @relation(fields: [regionId], references: [id])
-  
+  id                     Int             @id @default(autoincrement())
+  username               String          @unique
+  email                  String          @unique
+  password               String
+  isAdmin                Boolean         @default(false)
+  regionId               Int
+  rankId                 Int
+  createdAt              DateTime        @default(now())
+  avatarUrl              String?
+  comments               Comment[]       @relation("commentAuthor")
+  friendRequestsReceived FriendRequest[] @relation("friendRequestReceiver")
+  friendRequestsSent     FriendRequest[] @relation("friendRequestSender")
+  friendships1           Friendship[]    @relation("friendshipUser1")
+  friendships2           Friendship[]    @relation("friendshipUser2")
+  likes                  Like[]
+  messages               Message[]
+  receivedNotifications  Notification[]  @relation("receiver")
+  sentNotifications      Notification[]  @relation("sender")
+  publications           Publication[]   @relation("publicationAuthor")
+  reports                Report[]
+  tagsReceived           Tag[]           @relation("tagged")
+  tagsMade               Tag[]           @relation("tagger")
+  rank                   Rank            @relation(fields: [rankId], references: [id])
+  region                 Region          @relation(fields: [regionId], references: [id])
+  role                   Role[]          @relation("RoleToUser")
 }
 
-
 model FriendRequest {
-  id          Int           @id @default(autoincrement())
-  senderId    Int
-  receiverId  Int
-  read        Boolean       @default(false)
-  createdAt   DateTime      @default(now())
-
-  sender      User          @relation("friendRequestSender", fields: [senderId], references: [id])
-  receiver    User          @relation("friendRequestReceiver", fields: [receiverId], references: [id])
+  id         Int      @id @default(autoincrement())
+  senderId   Int
+  receiverId Int
+  createdAt  DateTime @default(now())
+  read       Boolean  @default(false)
+  receiver   User     @relation("friendRequestReceiver", fields: [receiverId], references: [id])
+  sender     User     @relation("friendRequestSender", fields: [senderId], references: [id])
 }
 
 model Friendship {
-  id          Int          @id @default(autoincrement())
-  user1Id     Int
-  user2Id     Int
-  createdAt   DateTime     @default(now())
-
-  user1       User         @relation("friendshipUser1", fields: [user1Id], references: [id])
-  user2       User         @relation("friendshipUser2", fields: [user2Id], references: [id])
+  id           Int           @id @default(autoincrement())
+  user1Id      Int
+  user2Id      Int
+  createdAt    DateTime      @default(now())
   conversation Conversation?
+  user1        User          @relation("friendshipUser1", fields: [user1Id], references: [id])
+  user2        User          @relation("friendshipUser2", fields: [user2Id], references: [id])
 }
 
 model Conversation {
   id           Int        @id @default(autoincrement())
   friendshipId Int        @unique
-
   friendship   Friendship @relation(fields: [friendshipId], references: [id])
   messages     Message[]
 }
@@ -79,11 +67,10 @@ model Message {
   senderId       Int
   conversationId Int
   text           String
-  read           Boolean      @default(false)
   createdAt      DateTime     @default(now())
-
-  sender         User         @relation(fields: [senderId], references: [id])
+  read           Boolean      @default(false)
   conversation   Conversation @relation(fields: [conversationId], references: [id])
+  sender         User         @relation(fields: [senderId], references: [id])
 }
 
 model Tag {
@@ -93,11 +80,10 @@ model Tag {
   publicationId Int?
   commentId     Int?
   createdAt     DateTime     @default(now())
-
-  tagger        User         @relation("tagger", fields: [taggerId], references: [id])
-  tagged        User         @relation("tagged", fields: [taggedId], references: [id])
-  publication   Publication? @relation(fields: [publicationId], references: [id])
   comment       Comment?     @relation(fields: [commentId], references: [id])
+  publication   Publication? @relation(fields: [publicationId], references: [id])
+  tagged        User         @relation("tagged", fields: [taggedId], references: [id])
+  tagger        User         @relation("tagger", fields: [taggerId], references: [id])
 }
 
 model Like {
@@ -106,50 +92,47 @@ model Like {
   publicationId Int?
   commentId     Int?
   createdAt     DateTime     @default(now())
-
-  user          User         @relation(fields: [userId], references: [id])
-  publication   Publication? @relation(fields: [publicationId], references: [id])
   comment       Comment?     @relation(fields: [commentId], references: [id])
+  publication   Publication? @relation(fields: [publicationId], references: [id])
+  user          User         @relation(fields: [userId], references: [id])
 }
 
 model Report {
   id            Int          @id @default(autoincrement())
-  authorId      Int
-  publicationId Int?
-  commentId     Int?
-  reasons       String[]     // Motius seleccionats al formulari
-  status        String       @default("pending") // pending | accepted | rejected
-  adminComment  String?      // Comentari opcional de l'admin en respondre
-  resolvedAt    DateTime?    // Quan s'ha resolt
-  read          Boolean      @default(false)
   createdAt     DateTime     @default(now())
-
+  authorId      Int
+  commentId     Int?
+  publicationId Int?
+  adminComment  String?
+  reasons       String[]
+  resolvedAt    DateTime?
+  status        String       @default("pending")
+  read          Boolean      @default(false)
   author        User         @relation(fields: [authorId], references: [id])
-  publication   Publication? @relation(fields: [publicationId], references: [id])
   comment       Comment?     @relation(fields: [commentId], references: [id])
+  publication   Publication? @relation(fields: [publicationId], references: [id])
 }
 
 model Role {
-  id            Int      @id @default(autoincrement())
-  name          String   @unique
-  desc          String
-  user          User[]
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  desc String
+  user User[] @relation("RoleToUser")
 }
 
 model Rank {
-  id            Int      @id @default(autoincrement())
-  name          String   @unique
-  desc          String
-  imageUrl      String?
-  user          User[]
+  id       Int     @id @default(autoincrement())
+  name     String  @unique
+  desc     String
+  imageUrl String?
+  user     User[]
 }
 
 model Region {
-  id            Int      @id @default(autoincrement())
-  name          String   @unique
-  desc          String
-  user          User[]
-  
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  desc String
+  user User[]
 }
 
 model Notification {
@@ -157,54 +140,52 @@ model Notification {
   typeId        Int
   senderId      Int
   receiverId    Int
-  publicationId Int?
-  commentId     Int?
-  message       String?
-  read          Boolean          @default(false)
   timestamp     DateTime         @default(now())
-
-  notiType      NotificationType @relation(fields: [typeId], references: [id])
-  sender        User             @relation("sender", fields: [senderId], references: [id])
-  receiver      User             @relation("receiver", fields: [receiverId], references: [id])
-  publication   Publication?     @relation(fields: [publicationId], references: [id])
+  commentId     Int?
+  publicationId Int?
+  read          Boolean          @default(false)
+  message       String?
   comment       Comment?         @relation(fields: [commentId], references: [id])
+  publication   Publication?     @relation(fields: [publicationId], references: [id])
+  receiver      User             @relation("receiver", fields: [receiverId], references: [id])
+  sender        User             @relation("sender", fields: [senderId], references: [id])
+  notiType      NotificationType @relation(fields: [typeId], references: [id])
 }
 
 model NotificationType {
-  id            Int      @id @default(autoincrement())
-  name          String   @unique
+  id            Int            @id @default(autoincrement())
+  name          String         @unique
   desc          String
   notifications Notification[]
 }
 
 model Publication {
-  id            Int     @id @default(autoincrement())
-  authorId      Int     
+  id            Int            @id @default(autoincrement())
+  authorId      Int
   text          String
   imageUrl      String?
+  createdAt     DateTime       @default(now())
   comments      Comment[]
-  reports       Report[]
   likes         Like[]
-  tags          Tag[]
   notifications Notification[]
-  createdAt     DateTime @default(now())
-
-  author        User    @relation("publicationAuthor", fields: [authorId], references: [id])
+  author        User           @relation("publicationAuthor", fields: [authorId], references: [id])
+  reports       Report[]
+  tags          Tag[]
 }
 
 model Comment {
-  id            Int              @id @default(autoincrement())
-  timestamp     DateTime         @default(now())
+  id            Int            @id @default(autoincrement())
+  timestamp     DateTime       @default(now())
   authorId      Int
   publicationId Int?
   commentId     Int?
   text          String
-  tags          Tag[]
-  comment       Comment?    @relation("replies", fields: [commentId], references: [id])
-  replies       Comment[]   @relation("replies")
+  author        User           @relation("commentAuthor", fields: [authorId], references: [id])
+  comment       Comment?       @relation("replies", fields: [commentId], references: [id])
+  replies       Comment[]      @relation("replies")
+  publication   Publication?   @relation(fields: [publicationId], references: [id])
   likes         Like[]
-  reports       Report[]
   notifications Notification[]
-  author        User        @relation("commentAuthor", fields: [authorId], references: [id])
-  publication   Publication? @relation(fields: [publicationId], references: [id])        
+  reports       Report[]
+  tags          Tag[]
 }

@@ -58,26 +58,32 @@ function formatDate(timestamp: string) {
 }
 
 export default function NotificationsPage() {
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
     const [notifications, setNotifications] = useState<Notification[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        if (status !== "authenticated" || !session?.user?.id) return
         fetch("/api/notifications")
-            .then(res => res.json())
-            .then(data => { setNotifications(data); setLoading(false) })
+            .then(res => res.text())
+            .then(text => {
+                if (!text) return
+                const data = JSON.parse(text)
+                if (Array.isArray(data)) setNotifications(data)
+            })
+            .finally(() => setLoading(false))
 
-        if (!session?.user?.id) return
         const pusherClient = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, { cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER! })
         const channel = pusherClient.subscribe(`notifications-${session.user.id}`)
-        channel.bind("new-notification", () => {
-            // Recarregar notificacions quan n'arriba una de nova
-            fetch("/api/notifications")
-                .then(res => res.json())
-                .then(setNotifications)
+        channel.bind("new-notification", async () => {
+            const res = await fetch("/api/notifications", { credentials: "include" })
+            const text = await res.text()
+            if (!text) return
+            const data = JSON.parse(text)
+            if (Array.isArray(data)) setNotifications(data)
         })
         return () => pusherClient.unsubscribe(`notifications-${session.user.id}`)
-    }, [session?.user?.id])
+    }, [session?.user?.id, status])
 
     if (loading) return <p className="text-center mt-10 text-gray-400">Carregant...</p>
 
