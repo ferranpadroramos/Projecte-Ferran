@@ -62,5 +62,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     await pusher.trigger(`chat-${id}`, "new-message", message)
 
+    // Avisar l'altre usuari perquè actualitzi el comptador de missatges
+    const receiverId = conv.friendship.user1Id === Number(session.user.id)
+        ? conv.friendship.user2Id
+        : conv.friendship.user1Id
+    await pusher.trigger(`messages-${receiverId}`, "new-message", {})
+
     return NextResponse.json(message, { status: 201 })
 }

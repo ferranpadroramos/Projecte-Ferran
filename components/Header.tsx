@@ -29,7 +29,16 @@ export default function Header() {
         channel.bind('new-notification', () => {
             fetch('/api/notifications/count').then(res => res.json()).then(data => setNotiCount(data.count ?? 0))
         })
-        return () => pusherClient.unsubscribe(`notifications-${session.user.id}`)
+
+        const msgChannel = pusherClient.subscribe(`messages-${session.user.id}`)
+        msgChannel.bind('new-message', () => {
+            fetch('/api/messages/count').then(res => res.json()).then(data => setMessageCount(data.count ?? 0))
+        })
+
+        return () => {
+            pusherClient.unsubscribe(`notifications-${session.user.id}`)
+            pusherClient.unsubscribe(`messages-${session.user.id}`)
+        }
     }, [session?.user?.id])
 
     async function contactAdmin() {
