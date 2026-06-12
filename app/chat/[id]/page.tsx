@@ -22,17 +22,14 @@ export default function ChatPage() {
     useEffect(() => {
         fetch(`/api/messages/${id}`)
             .then(res => res.json())
-            .then(setMessages)
+            .then(data => { if (Array.isArray(data)) setMessages(data) })
 
-        // Subscriure's al canal del xat per rebre missatges en temps real
         const pusherClient = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, { cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER! })
         const channel = pusherClient.subscribe(`chat-${id}`)
-        channel.bind("new-message", (msg: Message) => {
-            setMessages(prev => {
-                // Evitar duplicats (el missatge propi ja s'afegeix optimísticament)
-                if (prev.some(m => m.id === msg.id)) return prev
-                return [...prev, msg]
-            })
+        channel.bind("new-message", () => {
+            fetch(`/api/messages/${id}`)
+                .then(res => res.json())
+                .then(data => { if (Array.isArray(data)) setMessages(data) })
         })
         return () => pusherClient.unsubscribe(`chat-${id}`)
     }, [id])
@@ -44,14 +41,12 @@ export default function ChatPage() {
 
     async function handleSend() {
         if (!text.trim()) return
-        const res = await fetch(`/api/messages/${id}`, {
+        setText("")
+        await fetch(`/api/messages/${id}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text })
         })
-        const newMessage = await res.json()
-        setMessages(prev => [...prev, newMessage])
-        setText("")
     }
 
     return (
